@@ -1,23 +1,85 @@
 # Parlons !
 
-Application de pratique orale du français : 600 phrases courantes à écouter, répéter et
+Application de pratique orale du français : 800 phrases courantes à écouter, répéter et
 enregistrer, avec un objectif de 20 phrases par jour et des succès à débloquer.
 
-Six thèmes de 100 phrases : Vie quotidienne, Se faire des amis, Travail de vendeuse, Gérer une
-exposition d'art, Small talk au bureau, Entretien d'embauche.
+Huit thèmes de 100 phrases : Vie quotidienne, Se faire des amis, Travail de vendeuse, Gérer une
+exposition d'art, Small talk au bureau, Entretien d'embauche, Exprimer ses émotions au
+quotidien, Convaincre & Négocier.
 
-Tout tient dans **un seul fichier**, `index.html` : aucune installation, aucun serveur, aucun
-compte. La progression de chaque étudiant reste dans son navigateur.
+Aucun serveur, aucun compte : la progression de chaque étudiant reste sur son appareil.
+L'application s'installe sur téléphone (iPhone et Android), fonctionne hors connexion et se met
+à jour toute seule.
+
+| Fichier | Rôle |
+|---|---|
+| `index.html` | Toute l'application : phrases, styles, programme. |
+| `manifest.webmanifest`, `icons/` | Nom et icônes de l'application installée. |
+| `sw.js` | Fonctionnement hors connexion, mises à jour, rappel quotidien. |
 
 ## Publier sur GitHub Pages
 
 1. Sur github.com, créer un dépôt **public** (par exemple `parlons`).
-2. Y déposer `index.html` (bouton *Add file › Upload files*, puis *Commit changes*).
+2. Y déposer **tous les fichiers** du projet, dossier `icons` compris (bouton *Add file › Upload
+   files*, glisser les fichiers et le dossier, puis *Commit changes*).
 3. Dans *Settings › Pages* : *Source* = **Deploy from a branch**, *Branch* = **main**, dossier **/ (root)**, puis *Save*.
 4. Une minute plus tard, l'application est en ligne à l'adresse
    `https://<votre-compte>.github.io/parlons/`. C'est ce lien qu'il faut donner aux étudiants.
 
-Le micro n'est accessible qu'en HTTPS : GitHub Pages le fournit d'office.
+Le micro, l'installation et les notifications exigent HTTPS : GitHub Pages le fournit d'office.
+
+## Installer l'application sur téléphone
+
+L'application s'installe depuis le lien, sans passer par l'App Store ni Google Play :
+
+- **Android** (Chrome) : bouton **Installer** affiché sur l'accueil et dans *Réglages*, ou menu
+  ⋮ › « Installer l'application ».
+- **iPhone, iPad** (Safari) : bouton Partager, puis « Sur l'écran d'accueil ».
+
+Elle apparaît ensuite avec les autres applications, s'ouvre en plein écran et fonctionne sans
+connexion (la vérification automatique de la prononciation, elle, a besoin d'Internet).
+
+Sur iPhone, l'application installée a sa propre progression, distincte de celle de Safari : un
+étudiant qui a déjà commencé dans Safari exporte sa progression (*Réglages*), puis l'importe
+dans l'application installée.
+
+## Mises à jour
+
+Il suffit de publier la nouvelle version sur GitHub (branche `main`). Chaque étudiant la reçoit
+automatiquement, sans rien réinstaller :
+
+- au lancement, l'application charge la dernière version publiée ;
+- si elle est restée ouverte, elle vérifie régulièrement et se recharge d'elle-même dès que
+  cela ne dérange pas (jamais pendant un enregistrement) ;
+- sans connexion, elle utilise la dernière version reçue.
+
+GitHub Pages peut mettre une dizaine de minutes à diffuser une nouvelle version.
+
+**La progression n'est jamais touchée par une mise à jour** : elle est enregistrée à part, sur
+l'appareil. Deux règles pour qu'elle reste valable d'une version à l'autre :
+
+- ajouter les nouvelles phrases **à la fin** d'un thème, les nouveaux thèmes **à la fin** de la
+  liste, et ne jamais changer l'identifiant (`id`) d'un thème existant ;
+- ne pas changer la clé `parlons.v1`.
+
+## Rappel quotidien
+
+Dans *Réglages › Rappel quotidien* (ou depuis la carte proposée sur l'accueil), l'étudiant
+autorise les notifications et choisit une heure. Les jours où son objectif n'est pas encore
+atteint à cette heure-là, il reçoit une notification ; un seul rappel par jour, aucun si
+l'objectif est atteint.
+
+Limite à connaître : l'application n'a pas de serveur, et un téléphone ne laisse pas une
+application web se réveiller seule à heure fixe.
+
+| Appareil | Quand le rappel arrive |
+|---|---|
+| Android, application installée | Même application fermée, mais à l'heure choisie ou plus tard : c'est le téléphone qui décide du moment, et il peut sauter un jour. |
+| iPhone, application installée (iOS 16.4 ou plus récent) | Seulement si l'application est restée ouverte en arrière-plan. |
+| Ordinateur | Tant que l'application est ouverte dans le navigateur. |
+
+Un rappel fiable sur tous les téléphones, application fermée, demande un petit serveur d'envoi
+de notifications (« Web Push ») : il n'est pas inclus.
 
 ## Comment ça marche pour l'étudiant
 
@@ -29,10 +91,7 @@ Le micro n'est accessible qu'en HTTPS : GitHub Pages le fournit d'office.
 
 À la première ouverture, une présentation en trois écrans demande le prénom, fait **choisir
 la voix** (chaque voix s'écoute avant d'être choisie), puis montre la prise en main et
-comment **installer l'application sur le téléphone** :
-
-- iPhone, iPad : dans Safari, bouton Partager, puis « Sur l'écran d'accueil » ;
-- Android : dans Chrome, menu ⋮, puis « Ajouter à l'écran d'accueil ».
+comment **installer l'application sur le téléphone** (voir plus haut).
 
 Elle se rouvre à tout moment depuis *Réglages › Présentation*.
 
@@ -67,6 +126,8 @@ c'est un bon signal d'intelligibilité, pas un jugement phonétique. Elle se dé
 ## Données
 
 - Progression, succès, réglages : `localStorage` du navigateur (clé `parlons.v1`).
+- L'application demande au navigateur de conserver ces données même quand l'appareil manque
+  de place.
 - Dernier enregistrement validé de chaque phrase : IndexedDB, sur l'appareil.
 - *Réglages › Exporter ma progression* produit un fichier `.json` que l'étudiant peut garder,
   transférer sur un autre appareil, ou envoyer à son professeur.
@@ -75,7 +136,11 @@ Vider les données de navigation, ou utiliser la navigation privée, efface la p
 
 ## Modifier les phrases
 
-Dans `index.html`, chercher `const CATS` : chaque thème a un nom, une icône, une couleur et sa
-liste de phrases, **une par ligne**. Ajouter les nouvelles phrases **à la fin** d'un thème —
-l'identifiant d'une phrase est sa position, en insérer au milieu décalerait la progression
-déjà enregistrée. Écrire les nombres en toutes lettres.
+Dans `index.html`, chercher `const CATS` : chaque thème a un identifiant, un nom, une icône, une
+couleur et sa liste de phrases, **une par ligne**. Ajouter les nouvelles phrases **à la fin**
+d'un thème — l'identifiant d'une phrase est sa position, en insérer au milieu décalerait la
+progression déjà enregistrée. Écrire les nombres en toutes lettres.
+
+Pour ajouter un thème, copier un bloc existant à la fin de la liste et lui donner un nouvel
+identifiant de deux lettres. Une fois le fichier publié, les étudiants reçoivent la nouvelle
+version automatiquement.
