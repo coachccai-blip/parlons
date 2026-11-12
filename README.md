@@ -25,7 +25,7 @@ L'application s'installe sur téléphone (iPhone et Android), fonctionne hors co
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Toute l'application : phrases, styles, programme. |
-| `manifest.webmanifest`, `icons/` | Nom et icônes de l'application installée. |
+| `manifest.webmanifest`, `icons/` | Nom et icônes de l'application installée. Les icônes sont tirées du logo `Panda orateur « Parlons ! ».png`. |
 | `sw.js` | Fonctionnement hors connexion, mises à jour, rappel quotidien. |
 
 ## Publier sur GitHub Pages

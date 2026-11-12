@@ -6,11 +6,11 @@
    La progression de l'étudiant n'est pas ici : elle reste dans localStorage, côté page. */
 'use strict';
 
-const APP = 'parlons-app-v1';     // copie de l'application
+const APP = 'parlons-app-v2';     // copie de l'application
 const DATA = 'parlons-donnees';   // état du rappel, écrit par la page (jamais effacé ici)
 const at = name => new URL(name, self.location.href).href;
 const INDEX = at('./');
-const ASSETS = ['manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/badge-96.png'].map(at);
+const ASSETS = ['manifest.webmanifest', 'icons/logo-192.png', 'icons/logo-512.png', 'icons/logo-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png', 'icons/badge-96.png'].map(at);
 const NET_WAIT_MS = 3000;         // au-delà, on sert la copie locale et la mise à jour arrive ensuite
 
 self.addEventListener('install', e => {
@@ -95,7 +95,7 @@ async function remind() {
     done ? 'Encore ' + left + ' phrase' + (left > 1 ? 's' : '') + ' pour l\'objectif du jour' : 'Vos ' + s.goal + ' phrases du jour vous attendent',
     {
       body: streak ? 'Gardez votre série : ' + streak + ' jour' + (streak > 1 ? 's' : '') + ' d\'affilée !' : 'Quelques minutes suffisent. À vous de parler !',
-      icon: at('icons/icon-192.png'), badge: at('icons/badge-96.png'), tag: 'parlons-rappel', lang: 'fr',
+      icon: at('icons/logo-192.png'), badge: at('icons/badge-96.png'), tag: 'parlons-rappel', lang: 'fr',
     });
 }
 
