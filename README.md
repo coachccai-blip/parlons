@@ -7,6 +7,9 @@ Huit thèmes de 100 phrases : Vie quotidienne, Se faire des amis, Travail de ven
 exposition d'art, Small talk au bureau, Entretien d'embauche, Exprimer ses émotions au
 quotidien, Convaincre & Négocier.
 
+Chaque phrase est affichée avec sa traduction en anglais. Deux modes tirent les phrases au
+hasard dans tous les thèmes : le **mode rapide** (5 phrases) et le **mode illimité** (sans fin).
+
 Aucun serveur, aucun compte : la progression de chaque étudiant reste sur son appareil.
 L'application s'installe sur téléphone (iPhone et Android), fonctionne hors connexion et se met
 à jour toute seule.
@@ -87,6 +90,17 @@ de notifications (« Web Push ») : il n'est pas inclus.
 2. **S'enregistrer** en la disant.
 3. **Réessayer** jusqu'à ce que ce soit bien, puis passer à la suivante.
 
+### Modes au hasard
+
+Sur l'accueil, sous l'objectif du jour :
+
+- **Mode rapide** : 5 phrases tirées au hasard, puis un bilan (phrases validées, étoiles).
+- **Mode illimité** : des phrases au hasard les unes après les autres, sans répétition, jusqu'à
+  ce que l'étudiant appuie sur « Terminer ».
+
+Une phrase validée dans ces modes compte comme dans son thème : progression, objectif du jour
+et succès.
+
 ### Premier lancement
 
 À la première ouverture, une présentation en trois écrans demande le prénom, fait **choisir
@@ -137,9 +151,17 @@ Vider les données de navigation, ou utiliser la navigation privée, efface la p
 ## Modifier les phrases
 
 Dans `index.html`, chercher `const CATS` : chaque thème a un identifiant, un nom, une icône, une
-couleur et sa liste de phrases, **une par ligne**. Ajouter les nouvelles phrases **à la fin**
-d'un thème — l'identifiant d'une phrase est sa position, en insérer au milieu décalerait la
-progression déjà enregistrée. Écrire les nombres en toutes lettres.
+couleur et sa liste de phrases, **une par ligne** : la phrase en français, une barre `|`, puis
+sa traduction en anglais.
+
+```
+Un café, s'il vous plaît. | A coffee, please.
+```
+
+Ajouter les nouvelles phrases **à la fin** d'un thème — l'identifiant d'une phrase est sa
+position, en insérer au milieu décalerait la progression déjà enregistrée. Écrire les nombres
+en toutes lettres dans la phrase française. Corriger une traduction ne change rien à la
+progression.
 
 Pour ajouter un thème, copier un bloc existant à la fin de la liste et lui donner un nouvel
 identifiant de deux lettres. Une fois le fichier publié, les étudiants reçoivent la nouvelle

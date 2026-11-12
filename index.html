@@ -22,7 +22,8 @@
   (fonctionnement hors connexion, rappel quotidien). Les étudiants reçoivent automatiquement
   chaque nouvelle version de ce fichier, sans perdre leur progression.
 
-  Pour modifier les phrases : chercher « CATS » plus bas (une phrase par ligne). Ajouter les
+  Pour modifier les phrases : chercher « CATS » plus bas (une phrase par ligne, suivie de « | »
+  et de sa traduction en anglais). Ajouter les
   nouvelles phrases à la FIN d'un thème : l'identifiant d'une phrase est sa position, en insérer
   au milieu décalerait la progression déjà enregistrée par les étudiants.
 -->
@@ -129,6 +130,12 @@ body.is-practice .shell { padding-bottom: 32px; }
 .cat p { font-size: 13px; color: var(--muted); min-height: 2.9em; }
 .cat-foot { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 8px; color: var(--muted); }
 .cat-foot b { color: var(--ink); }
+.modes { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.mode { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; --c: var(--primary); transition: transform .15s, border-color .15s; }
+.mode:hover { transform: translateY(-2px); border-color: var(--c); }
+.mode h3 { font-size: 16px; line-height: 1.25; }
+.mode p { font-size: 13px; color: var(--muted); }
+@media (max-width: 480px) { .modes { grid-template-columns: 1fr; } }
 .overall { padding: 16px; margin-top: 12px; }
 .overall-row { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 8px; }
 .promo { margin-top: 14px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; }
@@ -149,10 +156,11 @@ body.is-practice .shell { padding-bottom: 32px; }
 .p-bar { height: 8px; margin-bottom: 16px; }
 .phrase { padding: 26px 22px 20px; text-align: center; }
 .phrase-num { font-size: 13px; font-weight: 700; color: var(--c); letter-spacing: .04em; text-transform: uppercase; }
-.phrase-text { font: 600 clamp(24px, 6.2vw, 34px)/1.25 var(--serif); letter-spacing: -.01em; margin: 12px 0 18px; text-wrap: balance; }
+.phrase-text { font: 600 clamp(24px, 6.2vw, 34px)/1.25 var(--serif); letter-spacing: -.01em; margin: 12px 0 0; text-wrap: balance; }
+.phrase-en { margin-top: 8px; font-size: clamp(15px, 4.2vw, 18px); color: var(--muted); text-wrap: balance; }
 .phrase-text .w-ok { color: var(--ok); }
 .phrase-text .w-bad { color: var(--bad); text-decoration: underline wavy; text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
-.listen { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.listen { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
 .note { font-size: 13px; color: var(--muted); margin-top: 12px; }
 
 .rec { margin-top: 14px; padding: 22px 18px; text-align: center; }
@@ -181,6 +189,7 @@ body.is-practice .shell { padding-bottom: 32px; }
 .list { margin-top: 14px; padding: 6px; }
 .list a { display: flex; gap: 10px; align-items: baseline; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; font-size: 15px; }
 .list a:hover, .list a[aria-current] { background: var(--surface-2); }
+.list small { display: block; font-size: 13px; color: var(--muted); }
 .list .n { width: 2em; text-align: right; color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums; flex: none; }
 .list .s { margin-left: auto; color: var(--gold); font-size: 13px; white-space: nowrap; flex: none; }
 .finish { padding: 34px 22px; text-align: center; }
@@ -257,846 +266,852 @@ body.is-practice .toasts { bottom: 20px; }
 'use strict';
 
 /* ───────────────────────── Phrases ─────────────────────────
-   8 thèmes × 100 phrases. Une phrase par ligne : pour en ajouter, écrire une nouvelle ligne
-   à la FIN du thème (l'identifiant d'une phrase est sa position dans le thème).
-   Écrire les nombres en toutes lettres. */
+   8 thèmes × 100 phrases. Une phrase par ligne : la phrase en français, une barre « | », puis sa
+   traduction en anglais. Pour en ajouter, écrire une nouvelle ligne à la FIN du thème
+   (l'identifiant d'une phrase est sa position dans le thème). Écrire les nombres en toutes lettres. */
 const lines = text => text.split('\n').map(s => s.trim()).filter(Boolean);
 const CATS = [
   { id: 'vq', name: 'Vie quotidienne', emoji: '🥐', color: '#E08A1E',
     desc: 'Saluer, demander son chemin, commander, se débrouiller.',
     phrases: lines(`
-      Bonjour, comment allez-vous ?
-      Ça va très bien, merci, et vous ?
-      Un café, s'il vous plaît.
-      L'addition, s'il vous plaît.
-      Combien ça coûte ?
-      Quelle heure est-il ?
-      Pardon, je n'ai pas compris.
-      Vous pouvez répéter, s'il vous plaît ?
-      Vous pouvez parler plus lentement ?
-      Qu'est-ce que ça veut dire ?
-      Excusez-moi, je cherche la gare.
-      C'est loin d'ici ?
-      Prenez la deuxième rue à gauche.
-      Où sont les toilettes, s'il vous plaît ?
-      Je voudrais une baguette et deux croissants.
-      Est-ce que vous acceptez la carte bancaire ?
-      À quelle heure ouvre la pharmacie ?
-      Je voudrais prendre rendez-vous chez le médecin.
-      J'ai mal à la tête depuis ce matin.
-      Il fait vraiment beau aujourd'hui !
-      On dirait qu'il va pleuvoir.
-      Qu'est-ce qu'on mange ce soir ?
-      J'ai une faim de loup !
-      C'était délicieux, merci beaucoup.
-      Excusez-moi, je suis en retard.
-      Ce n'est pas grave, ne vous inquiétez pas.
-      Tu fais quoi ce week-end ?
-      Ça te dit d'aller au cinéma ?
-      Avec plaisir, bonne idée !
-      Je ne peux pas, j'ai déjà quelque chose de prévu.
-      On se retrouve à quelle heure ?
-      À tout à l'heure !
-      Bonne journée, à demain !
-      Passe une bonne soirée !
-      Tu peux me donner un coup de main ?
-      Je vous remercie, c'est très gentil.
-      Je vous en prie.
-      J'ai oublié mes clés à la maison.
-      Il faut que je fasse les courses.
-      Je tombe de sommeil, je vais me coucher tôt.
-      Un aller-retour pour Lyon, s'il vous plaît.
-      À quelle heure part le prochain train ?
-      Le train a vingt minutes de retard.
-      Est-ce que ce bus va au centre-ville ?
-      Je descends au prochain arrêt.
-      Cette place est libre ?
-      Je vais prendre le métro, c'est plus rapide.
-      Il y a des embouteillages ce matin.
-      Où est-ce que je peux me garer ?
-      Je ne trouve pas mon chemin.
-      Une table pour deux, s'il vous plaît.
-      Qu'est-ce que vous me conseillez ?
-      Je vais prendre le plat du jour.
-      Une carafe d'eau, s'il vous plaît.
-      Je suis allergique aux noix.
-      Vous avez des plats végétariens ?
-      On peut avoir un peu de pain ?
-      C'est moi qui invite !
-      Je peux payer en liquide ?
-      Gardez la monnaie.
-      Allô, bonjour, c'est bien le cabinet du docteur ?
-      Je vous entends très mal.
-      Je vous rappelle dans cinq minutes.
-      Vous pouvez me laisser un message.
-      Je n'ai plus de batterie.
-      Tu as le code du wifi ?
-      J'ai de la fièvre et je tousse beaucoup.
-      J'ai besoin d'une ordonnance.
-      Prenez un comprimé matin et soir.
-      Ça va mieux, merci.
-      Je voudrais envoyer ce colis.
-      Je voudrais ouvrir un compte bancaire.
-      J'ai perdu ma carte bancaire.
-      Où est le distributeur le plus proche ?
-      Il fait un froid de canard !
-      Quelle chaleur aujourd'hui !
-      Il y a beaucoup de vent ce matin.
-      N'oublie pas ton parapluie.
-      Je cherche un appartement à louer.
-      Le loyer est de combien par mois ?
-      Le chauffage ne marche plus.
-      Il y a une fuite d'eau dans la salle de bain.
-      Tu peux sortir la poubelle ?
-      C'est ton tour de faire la vaisselle.
-      Je vais faire une lessive.
-      Il n'y a plus de lait dans le frigo.
-      Où est-ce que je peux trouver des œufs ?
-      Je vais prendre un kilo de tomates.
-      Ce sera tout, merci.
-      Vous avez de la monnaie ?
-      Quel jour sommes-nous ?
-      On est le combien, aujourd'hui ?
-      Mon anniversaire, c'est le mois prochain.
-      Je me lève tous les jours à sept heures.
-      Je n'ai pas entendu mon réveil ce matin.
-      Dépêche-toi, on va être en retard !
-      Ne t'inquiète pas, on a le temps.
-      Ça m'est égal, comme tu veux.
-      Je n'en ai aucune idée.
-      Quelle bonne nouvelle, félicitations !
+      Bonjour, comment allez-vous ? | Hello, how are you?
+      Ça va très bien, merci, et vous ? | I'm doing great, thanks. And you?
+      Un café, s'il vous plaît. | A coffee, please.
+      L'addition, s'il vous plaît. | The check, please.
+      Combien ça coûte ? | How much is it?
+      Quelle heure est-il ? | What time is it?
+      Pardon, je n'ai pas compris. | Sorry, I didn't catch that.
+      Vous pouvez répéter, s'il vous plaît ? | Could you say that again, please?
+      Vous pouvez parler plus lentement ? | Could you speak more slowly?
+      Qu'est-ce que ça veut dire ? | What does that mean?
+      Excusez-moi, je cherche la gare. | Excuse me, I'm looking for the train station.
+      C'est loin d'ici ? | Is it far from here?
+      Prenez la deuxième rue à gauche. | Take the second street on the left.
+      Où sont les toilettes, s'il vous plaît ? | Where's the restroom, please?
+      Je voudrais une baguette et deux croissants. | I'd like a baguette and two croissants.
+      Est-ce que vous acceptez la carte bancaire ? | Do you take cards?
+      À quelle heure ouvre la pharmacie ? | What time does the pharmacy open?
+      Je voudrais prendre rendez-vous chez le médecin. | I'd like to make a doctor's appointment.
+      J'ai mal à la tête depuis ce matin. | I've had a headache since this morning.
+      Il fait vraiment beau aujourd'hui ! | It's such a beautiful day!
+      On dirait qu'il va pleuvoir. | It looks like it's going to rain.
+      Qu'est-ce qu'on mange ce soir ? | What's for dinner tonight?
+      J'ai une faim de loup ! | I'm starving!
+      C'était délicieux, merci beaucoup. | That was delicious, thank you so much.
+      Excusez-moi, je suis en retard. | Sorry, I'm running late.
+      Ce n'est pas grave, ne vous inquiétez pas. | It's no big deal, don't worry.
+      Tu fais quoi ce week-end ? | What are you up to this weekend?
+      Ça te dit d'aller au cinéma ? | Do you feel like going to the movies?
+      Avec plaisir, bonne idée ! | I'd love to, great idea!
+      Je ne peux pas, j'ai déjà quelque chose de prévu. | I can't, I already have plans.
+      On se retrouve à quelle heure ? | What time should we meet?
+      À tout à l'heure ! | See you in a bit!
+      Bonne journée, à demain ! | Have a good day, see you tomorrow!
+      Passe une bonne soirée ! | Have a great evening!
+      Tu peux me donner un coup de main ? | Can you give me a hand?
+      Je vous remercie, c'est très gentil. | Thank you, that's very kind of you.
+      Je vous en prie. | You're welcome.
+      J'ai oublié mes clés à la maison. | I left my keys at home.
+      Il faut que je fasse les courses. | I need to go grocery shopping.
+      Je tombe de sommeil, je vais me coucher tôt. | I can barely keep my eyes open, I'm going to bed early.
+      Un aller-retour pour Lyon, s'il vous plaît. | A round-trip ticket to Lyon, please.
+      À quelle heure part le prochain train ? | What time does the next train leave?
+      Le train a vingt minutes de retard. | The train is running twenty minutes late.
+      Est-ce que ce bus va au centre-ville ? | Does this bus go downtown?
+      Je descends au prochain arrêt. | I'm getting off at the next stop.
+      Cette place est libre ? | Is this seat taken?
+      Je vais prendre le métro, c'est plus rapide. | I'll take the metro, it's faster.
+      Il y a des embouteillages ce matin. | There's a lot of traffic this morning.
+      Où est-ce que je peux me garer ? | Where can I park?
+      Je ne trouve pas mon chemin. | I can't find my way.
+      Une table pour deux, s'il vous plaît. | A table for two, please.
+      Qu'est-ce que vous me conseillez ? | What do you recommend?
+      Je vais prendre le plat du jour. | I'll have the daily special.
+      Une carafe d'eau, s'il vous plaît. | A pitcher of water, please.
+      Je suis allergique aux noix. | I'm allergic to nuts.
+      Vous avez des plats végétariens ? | Do you have any vegetarian dishes?
+      On peut avoir un peu de pain ? | Could we get some bread?
+      C'est moi qui invite ! | It's my treat!
+      Je peux payer en liquide ? | Can I pay in cash?
+      Gardez la monnaie. | Keep the change.
+      Allô, bonjour, c'est bien le cabinet du docteur ? | Hello, is this the doctor's office?
+      Je vous entends très mal. | I can barely hear you.
+      Je vous rappelle dans cinq minutes. | I'll call you back in five minutes.
+      Vous pouvez me laisser un message. | You can leave me a message.
+      Je n'ai plus de batterie. | My battery's dead.
+      Tu as le code du wifi ? | Do you have the Wi-Fi password?
+      J'ai de la fièvre et je tousse beaucoup. | I have a fever and a bad cough.
+      J'ai besoin d'une ordonnance. | I need a prescription.
+      Prenez un comprimé matin et soir. | Take one tablet morning and night.
+      Ça va mieux, merci. | I'm feeling better, thanks.
+      Je voudrais envoyer ce colis. | I'd like to send this package.
+      Je voudrais ouvrir un compte bancaire. | I'd like to open a bank account.
+      J'ai perdu ma carte bancaire. | I've lost my bank card.
+      Où est le distributeur le plus proche ? | Where's the nearest ATM?
+      Il fait un froid de canard ! | It's freezing cold!
+      Quelle chaleur aujourd'hui ! | It's so hot today!
+      Il y a beaucoup de vent ce matin. | It's really windy this morning.
+      N'oublie pas ton parapluie. | Don't forget your umbrella.
+      Je cherche un appartement à louer. | I'm looking for an apartment to rent.
+      Le loyer est de combien par mois ? | How much is the rent per month?
+      Le chauffage ne marche plus. | The heating has stopped working.
+      Il y a une fuite d'eau dans la salle de bain. | There's a water leak in the bathroom.
+      Tu peux sortir la poubelle ? | Can you take out the trash?
+      C'est ton tour de faire la vaisselle. | It's your turn to do the dishes.
+      Je vais faire une lessive. | I'm going to do a load of laundry.
+      Il n'y a plus de lait dans le frigo. | There's no milk left in the fridge.
+      Où est-ce que je peux trouver des œufs ? | Where can I find eggs?
+      Je vais prendre un kilo de tomates. | I'll take a kilo of tomatoes.
+      Ce sera tout, merci. | That'll be all, thanks.
+      Vous avez de la monnaie ? | Do you have any change?
+      Quel jour sommes-nous ? | What day is it today?
+      On est le combien, aujourd'hui ? | What's the date today?
+      Mon anniversaire, c'est le mois prochain. | My birthday is next month.
+      Je me lève tous les jours à sept heures. | I get up at seven every day.
+      Je n'ai pas entendu mon réveil ce matin. | I didn't hear my alarm this morning.
+      Dépêche-toi, on va être en retard ! | Hurry up, we're going to be late!
+      Ne t'inquiète pas, on a le temps. | Don't worry, we've got time.
+      Ça m'est égal, comme tu veux. | I don't mind, whatever you like.
+      Je n'en ai aucune idée. | I have no idea.
+      Quelle bonne nouvelle, félicitations ! | That's great news, congratulations!
     `) },
   { id: 'am', name: 'Se faire des amis', emoji: '🤝', color: '#3E9B4F',
     desc: 'Faire connaissance, complimenter, inviter, garder le contact.',
     phrases: lines(`
-      Salut ! Comment tu t'appelles ?
-      Ça me fait plaisir de te rencontrer.
-      Tu viens d'où ?
-      Je viens d'arriver en France.
-      Tu habites ici depuis longtemps ?
-      Tu fais quoi dans la vie ?
-      On peut se tutoyer ?
-      Tu connais beaucoup de monde ici ?
-      Je ne connais presque personne ici.
-      C'est la première fois que je viens ici.
-      Tu viens souvent ici ?
-      Comment vous vous êtes rencontrés ?
-      Je peux m'asseoir à côté de toi ?
-      Je peux me joindre à vous ?
-      Qu'est-ce que tu aimes faire pendant ton temps libre ?
-      Tu écoutes quoi comme musique ?
-      Tu as vu un bon film récemment ?
-      Moi aussi, j'adore ça !
-      On a beaucoup de points communs !
-      Ah bon ? Raconte-moi !
-      C'est vrai ? Je ne savais pas.
-      Ça a l'air passionnant !
-      Depuis quand tu fais de la photo ?
-      Tu parles d'autres langues ?
-      Tu parles très bien anglais !
-      J'apprends encore le français, parle doucement, s'il te plaît.
-      Tu peux me corriger si je fais des erreurs.
-      Comment on dit ça en français ?
-      J'adore ta veste, elle est superbe !
-      Tu as un très beau sourire.
-      Tu es vraiment sympa.
-      Tu es très drôle, tu sais !
-      J'aime beaucoup ton accent.
-      Tu as beaucoup de goût.
-      Tu cuisines vraiment bien !
-      C'est très joli chez toi.
-      Tu as l'air en pleine forme !
-      Ça te va super bien !
-      Tu as eu une idée géniale.
-      Tu expliques très bien.
-      J'admire ta patience.
-      Tu es quelqu'un de très généreux.
-      On se sent bien avec toi.
-      Tu as le don de mettre les gens à l'aise.
-      Bravo, tu as vraiment assuré !
-      Tu m'impressionnes !
-      J'aime beaucoup discuter avec toi.
-      Tu me fais toujours rire.
-      Merci, c'est gentil, ça me touche.
-      Tu es un amour !
-      Ça te dit de prendre un café un de ces jours ?
-      On va boire un verre ?
-      Tu es libre samedi soir ?
-      Je fais une petite soirée chez moi vendredi.
-      Tu veux venir avec nous ?
-      Viens, je te présente mes amis.
-      Plus on est de fous, plus on rit !
-      On pourrait aller se promener au parc.
-      Ça te dirait de visiter une exposition ?
-      On se fait un restaurant, un de ces soirs ?
-      Je t'invite à dîner à la maison.
-      Tu peux venir avec quelqu'un, si tu veux.
-      Qu'est-ce que j'apporte ?
-      J'apporte le dessert !
-      Super, j'ai hâte !
-      Dommage, je ne suis pas libre ce jour-là.
-      Une autre fois, avec plaisir !
-      On remet ça à la semaine prochaine ?
-      On se retrouve devant le cinéma ?
-      Je suis en bas de chez toi.
-      J'arrive dans dix minutes !
-      Pardon pour le retard, j'ai raté mon bus.
-      Tu me donnes ton numéro ?
-      Je t'envoie un message pour qu'on s'organise.
-      Tu es sur les réseaux sociaux ?
-      Je t'ajoute au groupe.
-      On reste en contact !
-      Donne-moi de tes nouvelles !
-      Appelle-moi quand tu veux.
-      Envoie-moi un message quand tu arrives chez toi.
-      J'ai passé une excellente soirée.
-      On a bien ri, ce soir !
-      Merci pour l'invitation, c'était super.
-      Il faut absolument qu'on refasse ça !
-      La prochaine fois, c'est chez moi.
-      Tu m'as manqué !
-      Ça fait trop longtemps, tu deviens quoi ?
-      Quel plaisir de te voir !
-      Ça n'a pas l'air d'aller, qu'est-ce qui se passe ?
-      Tu peux compter sur moi.
-      Je suis là si tu as besoin de parler.
-      Je te comprends tout à fait.
-      Ne t'en fais pas, ça arrive à tout le monde.
-      Courage, je pense à toi.
-      Joyeux anniversaire !
-      Bonne année, et surtout la santé !
-      Bon voyage, envoie-nous des photos !
-      Fais attention à toi.
-      Tu es vraiment quelqu'un en or.
-      À très vite, je t'embrasse !
+      Salut ! Comment tu t'appelles ? | Hi! What's your name?
+      Ça me fait plaisir de te rencontrer. | It's nice to meet you.
+      Tu viens d'où ? | Where are you from?
+      Je viens d'arriver en France. | I've just arrived in France.
+      Tu habites ici depuis longtemps ? | Have you lived here long?
+      Tu fais quoi dans la vie ? | What do you do for a living?
+      On peut se tutoyer ? | Can we use "tu" with each other?
+      Tu connais beaucoup de monde ici ? | Do you know a lot of people here?
+      Je ne connais presque personne ici. | I hardly know anyone here.
+      C'est la première fois que je viens ici. | It's my first time here.
+      Tu viens souvent ici ? | Do you come here often?
+      Comment vous vous êtes rencontrés ? | How did you two meet?
+      Je peux m'asseoir à côté de toi ? | Can I sit next to you?
+      Je peux me joindre à vous ? | Mind if I join you?
+      Qu'est-ce que tu aimes faire pendant ton temps libre ? | What do you like to do in your free time?
+      Tu écoutes quoi comme musique ? | What kind of music do you listen to?
+      Tu as vu un bon film récemment ? | Have you seen any good movies lately?
+      Moi aussi, j'adore ça ! | Me too, I love that!
+      On a beaucoup de points communs ! | We have so much in common!
+      Ah bon ? Raconte-moi ! | Oh really? Tell me more!
+      C'est vrai ? Je ne savais pas. | Really? I didn't know that.
+      Ça a l'air passionnant ! | That sounds fascinating!
+      Depuis quand tu fais de la photo ? | How long have you been doing photography?
+      Tu parles d'autres langues ? | Do you speak any other languages?
+      Tu parles très bien anglais ! | Your English is really good!
+      J'apprends encore le français, parle doucement, s'il te plaît. | I'm still learning French, so please speak slowly.
+      Tu peux me corriger si je fais des erreurs. | Feel free to correct me if I make mistakes.
+      Comment on dit ça en français ? | How do you say that in French?
+      J'adore ta veste, elle est superbe ! | I love your jacket, it's gorgeous!
+      Tu as un très beau sourire. | You have a beautiful smile.
+      Tu es vraiment sympa. | You're really nice.
+      Tu es très drôle, tu sais ! | You're really funny, you know!
+      J'aime beaucoup ton accent. | I really like your accent.
+      Tu as beaucoup de goût. | You have great taste.
+      Tu cuisines vraiment bien ! | You're a really good cook!
+      C'est très joli chez toi. | Your place is lovely.
+      Tu as l'air en pleine forme ! | You look great!
+      Ça te va super bien ! | That really suits you!
+      Tu as eu une idée géniale. | That was a brilliant idea.
+      Tu expliques très bien. | You explain things really well.
+      J'admire ta patience. | I admire your patience.
+      Tu es quelqu'un de très généreux. | You're such a generous person.
+      On se sent bien avec toi. | You're so easy to be around.
+      Tu as le don de mettre les gens à l'aise. | You have a gift for putting people at ease.
+      Bravo, tu as vraiment assuré ! | Well done, you nailed it!
+      Tu m'impressionnes ! | I'm impressed!
+      J'aime beaucoup discuter avec toi. | I really enjoy talking with you.
+      Tu me fais toujours rire. | You always make me laugh.
+      Merci, c'est gentil, ça me touche. | Thank you, that's sweet, it means a lot.
+      Tu es un amour ! | You're a sweetheart!
+      Ça te dit de prendre un café un de ces jours ? | Want to grab a coffee sometime?
+      On va boire un verre ? | Shall we go for a drink?
+      Tu es libre samedi soir ? | Are you free Saturday night?
+      Je fais une petite soirée chez moi vendredi. | I'm having a few people over on Friday.
+      Tu veux venir avec nous ? | Do you want to come with us?
+      Viens, je te présente mes amis. | Come on, I'll introduce you to my friends.
+      Plus on est de fous, plus on rit ! | The more, the merrier!
+      On pourrait aller se promener au parc. | We could go for a walk in the park.
+      Ça te dirait de visiter une exposition ? | Would you like to go see an exhibition?
+      On se fait un restaurant, un de ces soirs ? | How about dinner out one of these evenings?
+      Je t'invite à dîner à la maison. | I'd love to have you over for dinner.
+      Tu peux venir avec quelqu'un, si tu veux. | You can bring someone, if you like.
+      Qu'est-ce que j'apporte ? | What should I bring?
+      J'apporte le dessert ! | I'll bring dessert!
+      Super, j'ai hâte ! | Great, I can't wait!
+      Dommage, je ne suis pas libre ce jour-là. | Too bad, I'm not free that day.
+      Une autre fois, avec plaisir ! | Another time, I'd love to!
+      On remet ça à la semaine prochaine ? | Shall we move it to next week?
+      On se retrouve devant le cinéma ? | Shall we meet outside the movie theater?
+      Je suis en bas de chez toi. | I'm outside your place.
+      J'arrive dans dix minutes ! | I'll be there in ten minutes!
+      Pardon pour le retard, j'ai raté mon bus. | Sorry I'm late, I missed my bus.
+      Tu me donnes ton numéro ? | Can I get your number?
+      Je t'envoie un message pour qu'on s'organise. | I'll text you so we can make plans.
+      Tu es sur les réseaux sociaux ? | Are you on social media?
+      Je t'ajoute au groupe. | I'll add you to the group.
+      On reste en contact ! | Let's keep in touch!
+      Donne-moi de tes nouvelles ! | Let me know how you're doing!
+      Appelle-moi quand tu veux. | Call me anytime.
+      Envoie-moi un message quand tu arrives chez toi. | Text me when you get home.
+      J'ai passé une excellente soirée. | I had a wonderful evening.
+      On a bien ri, ce soir ! | We had a good laugh tonight!
+      Merci pour l'invitation, c'était super. | Thanks for having me, it was great.
+      Il faut absolument qu'on refasse ça ! | We absolutely have to do this again!
+      La prochaine fois, c'est chez moi. | Next time, it's at my place.
+      Tu m'as manqué ! | I've missed you!
+      Ça fait trop longtemps, tu deviens quoi ? | It's been way too long, what have you been up to?
+      Quel plaisir de te voir ! | It's so good to see you!
+      Ça n'a pas l'air d'aller, qu'est-ce qui se passe ? | You don't seem okay, what's going on?
+      Tu peux compter sur moi. | You can count on me.
+      Je suis là si tu as besoin de parler. | I'm here if you need to talk.
+      Je te comprends tout à fait. | I completely understand.
+      Ne t'en fais pas, ça arrive à tout le monde. | Don't worry, it happens to everyone.
+      Courage, je pense à toi. | Hang in there, I'm thinking of you.
+      Joyeux anniversaire ! | Happy birthday!
+      Bonne année, et surtout la santé ! | Happy New Year, and good health above all!
+      Bon voyage, envoie-nous des photos ! | Have a great trip, send us pictures!
+      Fais attention à toi. | Take care of yourself.
+      Tu es vraiment quelqu'un en or. | You've got a heart of gold.
+      À très vite, je t'embrasse ! | See you very soon, big hugs!
     `) },
   { id: 'vd', name: 'Travail de vendeuse', emoji: '🛍️', color: '#D6457F',
     desc: 'Accueillir, conseiller et encaisser en magasin.',
     phrases: lines(`
-      Bonjour, bienvenue !
-      Est-ce que je peux vous aider ?
-      Vous cherchez quelque chose en particulier ?
-      N'hésitez pas si vous avez besoin d'un conseil.
-      Je vous laisse regarder tranquillement.
-      Quelle taille faites-vous ?
-      Quelle est votre pointure ?
-      Nous l'avons aussi en bleu et en noir.
-      Je vais voir si nous l'avons en réserve.
-      Les cabines d'essayage sont au fond, à droite.
-      Alors, ça vous va ?
-      Cette couleur vous va très bien !
-      C'est un peu trop grand, non ?
-      Voulez-vous essayer la taille au-dessus ?
-      C'est une matière très agréable à porter.
-      Ça se lave en machine, à trente degrés.
-      C'est notre meilleure vente en ce moment.
-      Ce modèle est en promotion cette semaine.
-      Il y a trente pour cent de réduction sur tout le magasin.
-      Malheureusement, nous n'avons plus ce modèle en stock.
-      Je peux le commander pour vous, si vous voulez.
-      Vous le recevrez d'ici trois jours.
-      Je vous le mets de côté jusqu'à demain ?
-      Un instant, je suis à vous tout de suite.
-      Je vais demander à ma collègue.
-      Vous avez la carte de fidélité ?
-      Ça fait quarante-cinq euros, s'il vous plaît.
-      Vous préférez payer par carte ou en espèces ?
-      Vous pouvez insérer votre carte.
-      Voulez-vous un sac ?
-      C'est pour offrir ?
-      Je vous fais un paquet cadeau ?
-      Voici votre ticket de caisse.
-      Vous pouvez l'échanger pendant trente jours.
-      Avez-vous gardé le ticket de caisse ?
-      Je vais vous rembourser tout de suite.
-      Le magasin ferme dans dix minutes.
-      Nous sommes ouverts du lundi au samedi.
-      Merci de votre visite, bonne journée !
-      Au revoir, à bientôt !
-      Bonjour madame, bonjour monsieur.
-      Je suis à vous dans une minute.
-      C'est pour quelle occasion ?
-      Quel est votre budget ?
-      Vous avez une couleur préférée ?
-      Je vous conseille plutôt celui-ci.
-      Celui-ci est un peu moins cher.
-      C'est le dernier que nous avons.
-      Nous venons de recevoir la nouvelle collection.
-      Les nouveautés sont à l'entrée du magasin.
-      Les soldes commencent mercredi prochain.
-      Tout est à moitié prix.
-      Le deuxième article est offert.
-      La réduction est déjà appliquée sur le prix.
-      Vous pouvez essayer, bien sûr.
-      Combien d'articles avez-vous ?
-      Cette cabine est libre.
-      Je vous apporte une autre taille ?
-      Ça taille un peu petit.
-      La coupe vous va parfaitement.
-      Le pantalon est un peu long, on peut faire un ourlet.
-      Les retouches sont gratuites.
-      C'est du cent pour cent coton.
-      Cette veste est en cuir véritable.
-      C'est fabriqué en France.
-      Ça ne se froisse pas.
-      Il vaut mieux le laver à la main.
-      Ça va très bien avec ce pantalon.
-      Je peux vous montrer d'autres modèles.
-      Le rayon homme est au premier étage.
-      Les chaussures sont au sous-sol.
-      Les caisses sont juste derrière vous.
-      L'ascenseur est à côté de l'escalier.
-      Je vais vérifier le prix.
-      L'étiquette indique vingt-neuf euros.
-      Il y a une erreur sur le prix, excusez-moi.
-      Vous pouvez régler en trois fois sans frais.
-      Le paiement sans contact fonctionne.
-      Votre carte est refusée, voulez-vous réessayer ?
-      Vous pouvez composer votre code.
-      Je vous rends votre monnaie.
-      Vous voulez le ticket par e-mail ?
-      Souhaitez-vous créer une carte de fidélité ?
-      C'est gratuit et ça prend deux minutes.
-      Vous avez dix euros de réduction sur votre carte.
-      Je vous enlève l'antivol.
-      Je vous l'emballe ?
-      Pour un échange, adressez-vous à l'accueil.
-      Les articles soldés ne sont ni repris ni échangés.
-      On peut vous faire un avoir.
-      Qu'est-ce qui ne va pas avec cet article ?
-      Je comprends, je vais trouver une solution.
-      Excusez-nous pour l'attente.
-      Je vais appeler la responsable.
-      La livraison est gratuite à partir de cinquante euros.
-      Nous pouvons vous livrer à domicile.
-      Votre commande est arrivée.
-      Vous pouvez commander sur notre site.
-      Nous fermons exceptionnellement à dix-huit heures.
-      Merci, et très bonne fin de journée !
+      Bonjour, bienvenue ! | Hello, welcome!
+      Est-ce que je peux vous aider ? | Can I help you?
+      Vous cherchez quelque chose en particulier ? | Are you looking for anything in particular?
+      N'hésitez pas si vous avez besoin d'un conseil. | Let me know if you need any advice.
+      Je vous laisse regarder tranquillement. | Feel free to browse.
+      Quelle taille faites-vous ? | What size are you?
+      Quelle est votre pointure ? | What's your shoe size?
+      Nous l'avons aussi en bleu et en noir. | We also have it in blue and black.
+      Je vais voir si nous l'avons en réserve. | I'll check if we have it in the back.
+      Les cabines d'essayage sont au fond, à droite. | The fitting rooms are at the back, on the right.
+      Alors, ça vous va ? | So, how does it fit?
+      Cette couleur vous va très bien ! | That color looks great on you!
+      C'est un peu trop grand, non ? | It's a little too big, isn't it?
+      Voulez-vous essayer la taille au-dessus ? | Would you like to try the next size up?
+      C'est une matière très agréable à porter. | This fabric is very comfortable to wear.
+      Ça se lave en machine, à trente degrés. | It's machine washable at thirty degrees.
+      C'est notre meilleure vente en ce moment. | It's our best seller right now.
+      Ce modèle est en promotion cette semaine. | This style is on sale this week.
+      Il y a trente pour cent de réduction sur tout le magasin. | Everything in the store is thirty percent off.
+      Malheureusement, nous n'avons plus ce modèle en stock. | Unfortunately, that style is out of stock.
+      Je peux le commander pour vous, si vous voulez. | I can order it for you, if you'd like.
+      Vous le recevrez d'ici trois jours. | You'll have it within three days.
+      Je vous le mets de côté jusqu'à demain ? | Shall I hold it for you until tomorrow?
+      Un instant, je suis à vous tout de suite. | One moment, I'll be right with you.
+      Je vais demander à ma collègue. | Let me ask my colleague.
+      Vous avez la carte de fidélité ? | Do you have a loyalty card?
+      Ça fait quarante-cinq euros, s'il vous plaît. | That'll be forty-five euros, please.
+      Vous préférez payer par carte ou en espèces ? | Would you like to pay by card or cash?
+      Vous pouvez insérer votre carte. | You can insert your card.
+      Voulez-vous un sac ? | Would you like a bag?
+      C'est pour offrir ? | Is it a gift?
+      Je vous fais un paquet cadeau ? | Would you like it gift-wrapped?
+      Voici votre ticket de caisse. | Here's your receipt.
+      Vous pouvez l'échanger pendant trente jours. | You can exchange it within thirty days.
+      Avez-vous gardé le ticket de caisse ? | Did you keep the receipt?
+      Je vais vous rembourser tout de suite. | I'll refund you right away.
+      Le magasin ferme dans dix minutes. | The store closes in ten minutes.
+      Nous sommes ouverts du lundi au samedi. | We're open Monday through Saturday.
+      Merci de votre visite, bonne journée ! | Thanks for stopping by, have a nice day!
+      Au revoir, à bientôt ! | Goodbye, see you soon!
+      Bonjour madame, bonjour monsieur. | Hello, ma'am. Hello, sir.
+      Je suis à vous dans une minute. | I'll be with you in a minute.
+      C'est pour quelle occasion ? | What's the occasion?
+      Quel est votre budget ? | What's your budget?
+      Vous avez une couleur préférée ? | Do you have a favorite color?
+      Je vous conseille plutôt celui-ci. | I'd recommend this one instead.
+      Celui-ci est un peu moins cher. | This one is a little cheaper.
+      C'est le dernier que nous avons. | It's the last one we have.
+      Nous venons de recevoir la nouvelle collection. | We've just received the new collection.
+      Les nouveautés sont à l'entrée du magasin. | The new arrivals are at the front of the store.
+      Les soldes commencent mercredi prochain. | The sale starts next Wednesday.
+      Tout est à moitié prix. | Everything is half price.
+      Le deuxième article est offert. | The second item is free.
+      La réduction est déjà appliquée sur le prix. | The discount is already included in the price.
+      Vous pouvez essayer, bien sûr. | You're welcome to try it on, of course.
+      Combien d'articles avez-vous ? | How many items do you have?
+      Cette cabine est libre. | This fitting room is free.
+      Je vous apporte une autre taille ? | Shall I bring you another size?
+      Ça taille un peu petit. | It runs a little small.
+      La coupe vous va parfaitement. | The cut fits you perfectly.
+      Le pantalon est un peu long, on peut faire un ourlet. | The pants are a little long, but we can hem them.
+      Les retouches sont gratuites. | Alterations are free.
+      C'est du cent pour cent coton. | It's one hundred percent cotton.
+      Cette veste est en cuir véritable. | This jacket is genuine leather.
+      C'est fabriqué en France. | It's made in France.
+      Ça ne se froisse pas. | It doesn't wrinkle.
+      Il vaut mieux le laver à la main. | It's best to wash it by hand.
+      Ça va très bien avec ce pantalon. | It goes really well with these pants.
+      Je peux vous montrer d'autres modèles. | I can show you some other styles.
+      Le rayon homme est au premier étage. | The men's department is one floor up.
+      Les chaussures sont au sous-sol. | Shoes are in the basement.
+      Les caisses sont juste derrière vous. | The registers are right behind you.
+      L'ascenseur est à côté de l'escalier. | The elevator is next to the stairs.
+      Je vais vérifier le prix. | Let me check the price.
+      L'étiquette indique vingt-neuf euros. | The tag says twenty-nine euros.
+      Il y a une erreur sur le prix, excusez-moi. | There's a mistake on the price, I'm sorry.
+      Vous pouvez régler en trois fois sans frais. | You can pay in three interest-free installments.
+      Le paiement sans contact fonctionne. | Contactless payment is working.
+      Votre carte est refusée, voulez-vous réessayer ? | Your card was declined. Would you like to try again?
+      Vous pouvez composer votre code. | You can enter your PIN.
+      Je vous rends votre monnaie. | Here's your change.
+      Vous voulez le ticket par e-mail ? | Would you like your receipt by email?
+      Souhaitez-vous créer une carte de fidélité ? | Would you like to sign up for a loyalty card?
+      C'est gratuit et ça prend deux minutes. | It's free and only takes two minutes.
+      Vous avez dix euros de réduction sur votre carte. | You have a ten-euro discount on your card.
+      Je vous enlève l'antivol. | Let me take off the security tag.
+      Je vous l'emballe ? | Shall I wrap it for you?
+      Pour un échange, adressez-vous à l'accueil. | For exchanges, please go to the customer service desk.
+      Les articles soldés ne sont ni repris ni échangés. | Sale items cannot be returned or exchanged.
+      On peut vous faire un avoir. | We can give you store credit.
+      Qu'est-ce qui ne va pas avec cet article ? | What's wrong with the item?
+      Je comprends, je vais trouver une solution. | I understand, I'll find a solution.
+      Excusez-nous pour l'attente. | Sorry for the wait.
+      Je vais appeler la responsable. | I'll call the manager.
+      La livraison est gratuite à partir de cinquante euros. | Delivery is free on orders over fifty euros.
+      Nous pouvons vous livrer à domicile. | We can deliver to your home.
+      Votre commande est arrivée. | Your order has arrived.
+      Vous pouvez commander sur notre site. | You can order on our website.
+      Nous fermons exceptionnellement à dix-huit heures. | Today only, we're closing at six p.m.
+      Merci, et très bonne fin de journée ! | Thank you, and enjoy the rest of your day!
     `) },
   { id: 'ex', name: 'Gérer une exposition d\'art', emoji: '🎨', color: '#8A56D6',
     desc: 'Accueillir le public, présenter les œuvres, organiser l\'accrochage.',
     phrases: lines(`
-      Bienvenue à la galerie !
-      L'entrée est libre.
-      Voici le catalogue de l'exposition.
-      L'exposition dure jusqu'à la fin du mois.
-      Le vernissage aura lieu jeudi soir.
-      Vous êtes cordialement invités au vernissage.
-      Suivez-moi, je vous fais visiter.
-      La visite guidée commence dans cinq minutes.
-      Je vous présente l'artiste.
-      Cette exposition réunit une trentaine d'œuvres.
-      L'artiste travaille surtout à l'huile.
-      Cette toile date de l'année dernière.
-      C'est une pièce unique.
-      Cette sculpture est en bronze.
-      Cette série s'inspire de la nature.
-      Regardez la lumière dans ce coin du tableau.
-      Les couleurs sont magnifiques !
-      Que ressentez-vous devant ce tableau ?
-      Quelle œuvre préférez-vous ?
-      Merci de ne pas toucher les œuvres.
-      Les photos sans flash sont autorisées.
-      Cette œuvre est-elle à vendre ?
-      Cette œuvre est déjà réservée.
-      Le prix est indiqué sur la liste.
-      Je peux vous envoyer la liste des prix par e-mail.
-      Souhaitez-vous laisser vos coordonnées ?
-      Nous pouvons livrer le tableau chez vous.
-      Le tableau est vendu avec un certificat d'authenticité.
-      Il faut accrocher cette toile un peu plus haut.
-      Attention, cette œuvre est très fragile !
-      Où est-ce qu'on installe cette sculpture ?
-      Il faut régler l'éclairage de cette salle.
-      Les cartels ne sont pas encore imprimés.
-      Le transporteur livre les œuvres demain matin.
-      Tout doit être prêt avant l'ouverture.
-      Nous attendons une centaine de visiteurs.
-      L'artiste sera présent samedi après-midi.
-      La presse arrive à dix-huit heures.
-      Merci d'être venus si nombreux !
-      J'espère que l'exposition vous a plu.
-      Bonsoir à tous, et merci d'être là.
-      Je m'occupe de l'organisation de l'exposition.
-      Le thème de l'exposition, c'est la lumière.
-      Nous exposons le travail de douze artistes.
-      C'est sa première exposition personnelle.
-      L'artiste vit et travaille à Paris.
-      Son travail est exposé dans le monde entier.
-      Cette œuvre a été réalisée spécialement pour l'exposition.
-      C'est une technique mixte sur toile.
-      C'est une aquarelle sur papier.
-      Ce sont des photographies en noir et blanc.
-      Il s'agit d'un tirage limité à dix exemplaires.
-      Chaque tirage est numéroté et signé.
-      Cette installation occupe toute la salle.
-      La vidéo dure environ huit minutes.
-      Le parcours commence par la salle de gauche.
-      Prenez votre temps pour regarder.
-      Approchez-vous pour voir les détails.
-      Reculez un peu, on voit mieux l'ensemble.
-      Qu'est-ce que cette œuvre vous évoque ?
-      Chacun peut l'interpréter à sa façon.
-      L'artiste joue avec les ombres et les reflets.
-      Les formes sont très épurées.
-      On reconnaît tout de suite son style.
-      C'est une œuvre de jeunesse.
-      Ce tableau fait partie d'une collection privée.
-      Cette pièce nous a été prêtée par un musée.
-      N'hésitez pas à me poser des questions.
-      Je reste à votre disposition toute la soirée.
-      Un verre vous attend au fond de la salle.
-      Le livre d'or est à l'entrée.
-      Vous pouvez laisser un mot dans le livre d'or.
-      Inscrivez-vous à notre lettre d'information.
-      Suivez-nous sur les réseaux sociaux.
-      Le catalogue est en vente à l'accueil.
-      Les affiches coûtent quinze euros.
-      La galerie est ouverte du mardi au dimanche.
-      Nous fermons à dix-neuf heures.
-      L'entrée coûte huit euros, tarif réduit cinq euros.
-      C'est gratuit pour les moins de dix-huit ans.
-      Le vestiaire est à votre droite.
-      Les sacs à dos doivent rester au vestiaire.
-      Il est interdit de manger dans les salles.
-      Merci de parler à voix basse.
-      Ce tableau vaut trois mille euros.
-      Le prix comprend l'encadrement.
-      Vous pouvez régler en plusieurs fois.
-      Un point rouge signifie que l'œuvre est vendue.
-      Je vous prépare la facture.
-      Nous emballons l'œuvre avec beaucoup de soin.
-      Il faut assurer les œuvres pendant le transport.
-      Les caisses arrivent cet après-midi.
-      Il faut repeindre ce mur en blanc.
-      Ce tableau n'est pas droit.
-      Il manque un projecteur dans cette salle.
-      On a besoin d'une échelle et d'un niveau.
-      Les invitations sont parties la semaine dernière.
-      Le communiqué de presse est prêt.
-      Le démontage est prévu lundi.
-      C'est un vrai succès, bravo à toute l'équipe !
+      Bienvenue à la galerie ! | Welcome to the gallery!
+      L'entrée est libre. | Admission is free.
+      Voici le catalogue de l'exposition. | Here's the exhibition catalog.
+      L'exposition dure jusqu'à la fin du mois. | The exhibition runs until the end of the month.
+      Le vernissage aura lieu jeudi soir. | The opening reception is on Thursday evening.
+      Vous êtes cordialement invités au vernissage. | You're cordially invited to the opening.
+      Suivez-moi, je vous fais visiter. | Follow me, I'll show you around.
+      La visite guidée commence dans cinq minutes. | The guided tour starts in five minutes.
+      Je vous présente l'artiste. | Let me introduce you to the artist.
+      Cette exposition réunit une trentaine d'œuvres. | This exhibition brings together about thirty works.
+      L'artiste travaille surtout à l'huile. | The artist works mainly in oils.
+      Cette toile date de l'année dernière. | This painting is from last year.
+      C'est une pièce unique. | It's a one-of-a-kind piece.
+      Cette sculpture est en bronze. | This sculpture is made of bronze.
+      Cette série s'inspire de la nature. | This series is inspired by nature.
+      Regardez la lumière dans ce coin du tableau. | Look at the light in this corner of the painting.
+      Les couleurs sont magnifiques ! | The colors are stunning!
+      Que ressentez-vous devant ce tableau ? | How does this painting make you feel?
+      Quelle œuvre préférez-vous ? | Which piece is your favorite?
+      Merci de ne pas toucher les œuvres. | Please don't touch the artwork.
+      Les photos sans flash sont autorisées. | Photos are allowed, but no flash.
+      Cette œuvre est-elle à vendre ? | Is this piece for sale?
+      Cette œuvre est déjà réservée. | This piece is already reserved.
+      Le prix est indiqué sur la liste. | The price is on the list.
+      Je peux vous envoyer la liste des prix par e-mail. | I can email you the price list.
+      Souhaitez-vous laisser vos coordonnées ? | Would you like to leave your contact details?
+      Nous pouvons livrer le tableau chez vous. | We can deliver the painting to your home.
+      Le tableau est vendu avec un certificat d'authenticité. | The painting comes with a certificate of authenticity.
+      Il faut accrocher cette toile un peu plus haut. | This painting needs to be hung a little higher.
+      Attention, cette œuvre est très fragile ! | Careful, this piece is very fragile!
+      Où est-ce qu'on installe cette sculpture ? | Where should we put this sculpture?
+      Il faut régler l'éclairage de cette salle. | We need to adjust the lighting in this room.
+      Les cartels ne sont pas encore imprimés. | The wall labels haven't been printed yet.
+      Le transporteur livre les œuvres demain matin. | The shipper is delivering the works tomorrow morning.
+      Tout doit être prêt avant l'ouverture. | Everything has to be ready before we open.
+      Nous attendons une centaine de visiteurs. | We're expecting about a hundred visitors.
+      L'artiste sera présent samedi après-midi. | The artist will be here on Saturday afternoon.
+      La presse arrive à dix-huit heures. | The press is arriving at six p.m.
+      Merci d'être venus si nombreux ! | Thank you all for coming, what a great turnout!
+      J'espère que l'exposition vous a plu. | I hope you enjoyed the exhibition.
+      Bonsoir à tous, et merci d'être là. | Good evening, everyone, and thank you for being here.
+      Je m'occupe de l'organisation de l'exposition. | I'm in charge of organizing the exhibition.
+      Le thème de l'exposition, c'est la lumière. | The theme of the exhibition is light.
+      Nous exposons le travail de douze artistes. | We're showing the work of twelve artists.
+      C'est sa première exposition personnelle. | This is the artist's first solo show.
+      L'artiste vit et travaille à Paris. | The artist lives and works in Paris.
+      Son travail est exposé dans le monde entier. | Their work is exhibited around the world.
+      Cette œuvre a été réalisée spécialement pour l'exposition. | This piece was created especially for the exhibition.
+      C'est une technique mixte sur toile. | It's mixed media on canvas.
+      C'est une aquarelle sur papier. | It's a watercolor on paper.
+      Ce sont des photographies en noir et blanc. | These are black-and-white photographs.
+      Il s'agit d'un tirage limité à dix exemplaires. | It's a limited edition of ten prints.
+      Chaque tirage est numéroté et signé. | Each print is numbered and signed.
+      Cette installation occupe toute la salle. | This installation takes up the whole room.
+      La vidéo dure environ huit minutes. | The video is about eight minutes long.
+      Le parcours commence par la salle de gauche. | The tour starts in the room on the left.
+      Prenez votre temps pour regarder. | Take your time looking around.
+      Approchez-vous pour voir les détails. | Come closer to see the details.
+      Reculez un peu, on voit mieux l'ensemble. | Step back a little, you get a better view of the whole piece.
+      Qu'est-ce que cette œuvre vous évoque ? | What does this piece bring to mind?
+      Chacun peut l'interpréter à sa façon. | Everyone can interpret it in their own way.
+      L'artiste joue avec les ombres et les reflets. | The artist plays with shadows and reflections.
+      Les formes sont très épurées. | The shapes are very clean and minimal.
+      On reconnaît tout de suite son style. | You recognize the artist's style right away.
+      C'est une œuvre de jeunesse. | It's an early work.
+      Ce tableau fait partie d'une collection privée. | This painting is part of a private collection.
+      Cette pièce nous a été prêtée par un musée. | This piece is on loan from a museum.
+      N'hésitez pas à me poser des questions. | Feel free to ask me any questions.
+      Je reste à votre disposition toute la soirée. | I'll be available all evening if you need anything.
+      Un verre vous attend au fond de la salle. | There's a drink waiting for you at the back of the room.
+      Le livre d'or est à l'entrée. | The guest book is by the entrance.
+      Vous pouvez laisser un mot dans le livre d'or. | You're welcome to leave a note in the guest book.
+      Inscrivez-vous à notre lettre d'information. | Sign up for our newsletter.
+      Suivez-nous sur les réseaux sociaux. | Follow us on social media.
+      Le catalogue est en vente à l'accueil. | The catalog is on sale at the front desk.
+      Les affiches coûtent quinze euros. | The posters are fifteen euros.
+      La galerie est ouverte du mardi au dimanche. | The gallery is open Tuesday through Sunday.
+      Nous fermons à dix-neuf heures. | We close at seven p.m.
+      L'entrée coûte huit euros, tarif réduit cinq euros. | Admission is eight euros, or five at the reduced rate.
+      C'est gratuit pour les moins de dix-huit ans. | It's free for anyone under eighteen.
+      Le vestiaire est à votre droite. | The coat check is on your right.
+      Les sacs à dos doivent rester au vestiaire. | Backpacks must be left at the coat check.
+      Il est interdit de manger dans les salles. | No eating in the exhibition rooms, please.
+      Merci de parler à voix basse. | Please keep your voices down.
+      Ce tableau vaut trois mille euros. | This painting is worth three thousand euros.
+      Le prix comprend l'encadrement. | The price includes framing.
+      Vous pouvez régler en plusieurs fois. | You can pay in installments.
+      Un point rouge signifie que l'œuvre est vendue. | A red dot means the piece has been sold.
+      Je vous prépare la facture. | I'll prepare the invoice for you.
+      Nous emballons l'œuvre avec beaucoup de soin. | We pack the artwork with great care.
+      Il faut assurer les œuvres pendant le transport. | The works need to be insured during transport.
+      Les caisses arrivent cet après-midi. | The crates are arriving this afternoon.
+      Il faut repeindre ce mur en blanc. | This wall needs to be repainted white.
+      Ce tableau n'est pas droit. | This painting isn't straight.
+      Il manque un projecteur dans cette salle. | There's a spotlight missing in this room.
+      On a besoin d'une échelle et d'un niveau. | We need a ladder and a level.
+      Les invitations sont parties la semaine dernière. | The invitations went out last week.
+      Le communiqué de presse est prêt. | The press release is ready.
+      Le démontage est prévu lundi. | We take the show down on Monday.
+      C'est un vrai succès, bravo à toute l'équipe ! | It's a real success, well done to the whole team!
     `) },
   { id: 'bu', name: 'Small talk au bureau', emoji: '☕', color: '#1F9C96',
     desc: 'Discuter avec les collègues, à la pause comme avant une réunion.',
     phrases: lines(`
-      Salut, ça va ce matin ?
-      Quoi de neuf ?
-      Pas grand-chose, la routine.
-      Tu as passé un bon week-end ?
-      Oui, très bien, et toi ?
-      Rien de spécial, j'ai fait la grasse matinée.
-      Quel temps, ce matin !
-      Il y avait un monde fou dans le métro.
-      Tu veux un café ?
-      Volontiers, merci !
-      On déjeune ensemble ce midi ?
-      Tu manges où, aujourd'hui ?
-      Tu as vu le match hier soir ?
-      Comment vont les enfants ?
-      Tu pars en vacances cet été ?
-      Tu as l'air en forme, aujourd'hui !
-      Tu as une petite mine, tout va bien ?
-      J'ai mal dormi cette nuit.
-      Vivement le week-end !
-      Enfin vendredi !
-      Tu as cinq minutes ?
-      Je peux te poser une question ?
-      Tu peux m'aider avec ce dossier ?
-      Bien sûr, donne-moi deux minutes.
-      Tu as reçu mon e-mail ?
-      Je te l'envoie tout de suite.
-      La réunion commence à quelle heure ?
-      La réunion est reportée à demain.
-      Ça s'est bien passé, ta réunion ?
-      Bon courage pour ta présentation !
-      J'ai un travail fou en ce moment.
-      L'imprimante est encore en panne !
-      Félicitations pour ta promotion !
-      C'est l'anniversaire de Julie, on signe une carte.
-      Je suis en télétravail demain.
-      Je reviens dans cinq minutes.
-      Je file, j'ai un train à prendre.
-      Bonne soirée, à demain !
-      Bon week-end à tous !
-      Bonnes vacances, profite bien !
-      Bonjour tout le monde !
-      Tu es là de bonne heure, ce matin !
-      Tu as bien dormi ?
-      Il fait un temps magnifique, on mange dehors ?
-      Quel froid, ce matin !
-      Tu viens comment, au bureau ?
-      Je viens à vélo quand il fait beau.
-      J'ai mis une heure pour venir.
-      Il y a encore une grève des transports.
-      Tu habites loin d'ici ?
-      Tu travailles ici depuis longtemps ?
-      Tu es dans quel service ?
-      On ne s'est pas déjà croisés ?
-      Je crois qu'on n'a pas été présentés.
-      Je viens d'arriver dans l'équipe.
-      Bienvenue dans l'équipe !
-      Si tu as besoin de quelque chose, n'hésite pas.
-      Je te fais visiter les bureaux ?
-      La machine à café est au bout du couloir.
-      Tu prends du sucre ?
-      Il n'y a plus de café, qui en rachète ?
-      J'ai apporté des croissants !
-      Qui a fait ce gâteau ? Il est délicieux !
-      Tu as testé le nouveau restaurant d'en face ?
-      Qu'est-ce que tu as prévu ce soir ?
-      Tu as regardé quelque chose de bien, récemment ?
-      Je te conseille cette série, elle est géniale.
-      Tu fais du sport ?
-      Je cours deux fois par semaine.
-      Tu as des projets pour les vacances ?
-      On part une semaine à la montagne.
-      C'était comment, tes vacances ?
-      Tu as bonne mine, tu reviens de vacances ?
-      Ça fait plaisir de te revoir !
-      Ça fait longtemps qu'on ne s'est pas vus !
-      Tu as changé de coiffure ? Ça te va bien !
-      Ton fils va mieux ?
-      Quelque chose ne va pas ? Je peux t'aider ?
-      Ne t'en fais pas, ça va s'arranger.
-      Tu as fait du bon travail.
-      Merci pour ton aide, c'est vraiment sympa.
-      De rien, c'est normal.
-      Je te dois un café !
-      Excuse-moi de te déranger.
-      Je ne te dérange pas longtemps.
-      On en parle après la réunion ?
-      Tu es disponible cet après-midi ?
-      Je te tiens au courant.
-      Tu peux me transférer le message ?
-      Je n'ai pas eu le temps de regarder.
-      C'est urgent ou ça peut attendre demain ?
-      La salle de réunion est déjà prise.
-      Le wifi ne marche pas, ce matin.
-      Mon ordinateur est très lent aujourd'hui.
-      Tu as un chargeur à me prêter ?
-      Je sors prendre l'air cinq minutes.
-      Je pars un peu plus tôt aujourd'hui.
-      On prend un verre après le travail ?
-      À lundi, repose-toi bien !
-      Allez, bon courage pour la fin de la journée !
+      Salut, ça va ce matin ? | Hi, how's it going this morning?
+      Quoi de neuf ? | What's new?
+      Pas grand-chose, la routine. | Not much, same old.
+      Tu as passé un bon week-end ? | Did you have a good weekend?
+      Oui, très bien, et toi ? | Yes, really good. How about you?
+      Rien de spécial, j'ai fait la grasse matinée. | Nothing special, I slept in.
+      Quel temps, ce matin ! | Some weather we're having this morning!
+      Il y avait un monde fou dans le métro. | The metro was packed.
+      Tu veux un café ? | Want a coffee?
+      Volontiers, merci ! | I'd love one, thanks!
+      On déjeune ensemble ce midi ? | Want to have lunch together today?
+      Tu manges où, aujourd'hui ? | Where are you eating today?
+      Tu as vu le match hier soir ? | Did you see the game last night?
+      Comment vont les enfants ? | How are the kids?
+      Tu pars en vacances cet été ? | Are you going away this summer?
+      Tu as l'air en forme, aujourd'hui ! | You look full of energy today!
+      Tu as une petite mine, tout va bien ? | You look a little tired, is everything okay?
+      J'ai mal dormi cette nuit. | I didn't sleep well last night.
+      Vivement le week-end ! | I can't wait for the weekend!
+      Enfin vendredi ! | Finally, it's Friday!
+      Tu as cinq minutes ? | Do you have five minutes?
+      Je peux te poser une question ? | Can I ask you a question?
+      Tu peux m'aider avec ce dossier ? | Can you help me with this file?
+      Bien sûr, donne-moi deux minutes. | Sure, give me two minutes.
+      Tu as reçu mon e-mail ? | Did you get my email?
+      Je te l'envoie tout de suite. | I'll send it to you right now.
+      La réunion commence à quelle heure ? | What time does the meeting start?
+      La réunion est reportée à demain. | The meeting has been pushed to tomorrow.
+      Ça s'est bien passé, ta réunion ? | Did your meeting go well?
+      Bon courage pour ta présentation ! | Good luck with your presentation!
+      J'ai un travail fou en ce moment. | I'm swamped with work right now.
+      L'imprimante est encore en panne ! | The printer is broken again!
+      Félicitations pour ta promotion ! | Congratulations on your promotion!
+      C'est l'anniversaire de Julie, on signe une carte. | It's Julie's birthday, we're signing a card.
+      Je suis en télétravail demain. | I'm working from home tomorrow.
+      Je reviens dans cinq minutes. | I'll be back in five minutes.
+      Je file, j'ai un train à prendre. | I've got to run, I have a train to catch.
+      Bonne soirée, à demain ! | Have a good evening, see you tomorrow!
+      Bon week-end à tous ! | Have a great weekend, everyone!
+      Bonnes vacances, profite bien ! | Have a great vacation, enjoy it!
+      Bonjour tout le monde ! | Good morning, everyone!
+      Tu es là de bonne heure, ce matin ! | You're in early this morning!
+      Tu as bien dormi ? | Did you sleep well?
+      Il fait un temps magnifique, on mange dehors ? | The weather's gorgeous, shall we eat outside?
+      Quel froid, ce matin ! | It's so cold this morning!
+      Tu viens comment, au bureau ? | How do you get to work?
+      Je viens à vélo quand il fait beau. | I bike in when the weather's nice.
+      J'ai mis une heure pour venir. | It took me an hour to get here.
+      Il y a encore une grève des transports. | There's another transit strike.
+      Tu habites loin d'ici ? | Do you live far from here?
+      Tu travailles ici depuis longtemps ? | Have you worked here long?
+      Tu es dans quel service ? | Which department are you in?
+      On ne s'est pas déjà croisés ? | Haven't we run into each other before?
+      Je crois qu'on n'a pas été présentés. | I don't think we've been introduced.
+      Je viens d'arriver dans l'équipe. | I've just joined the team.
+      Bienvenue dans l'équipe ! | Welcome to the team!
+      Si tu as besoin de quelque chose, n'hésite pas. | If you need anything, just ask.
+      Je te fais visiter les bureaux ? | Shall I show you around the office?
+      La machine à café est au bout du couloir. | The coffee machine is at the end of the hall.
+      Tu prends du sucre ? | Do you take sugar?
+      Il n'y a plus de café, qui en rachète ? | We're out of coffee, who's buying more?
+      J'ai apporté des croissants ! | I brought croissants!
+      Qui a fait ce gâteau ? Il est délicieux ! | Who made this cake? It's delicious!
+      Tu as testé le nouveau restaurant d'en face ? | Have you tried the new restaurant across the street?
+      Qu'est-ce que tu as prévu ce soir ? | What are your plans for tonight?
+      Tu as regardé quelque chose de bien, récemment ? | Have you watched anything good lately?
+      Je te conseille cette série, elle est géniale. | You should watch this show, it's fantastic.
+      Tu fais du sport ? | Do you work out?
+      Je cours deux fois par semaine. | I go running twice a week.
+      Tu as des projets pour les vacances ? | Any vacation plans?
+      On part une semaine à la montagne. | We're going to the mountains for a week.
+      C'était comment, tes vacances ? | How was your vacation?
+      Tu as bonne mine, tu reviens de vacances ? | You look great, are you just back from vacation?
+      Ça fait plaisir de te revoir ! | It's good to see you again!
+      Ça fait longtemps qu'on ne s'est pas vus ! | Long time no see!
+      Tu as changé de coiffure ? Ça te va bien ! | Did you change your hair? It looks great!
+      Ton fils va mieux ? | Is your son feeling better?
+      Quelque chose ne va pas ? Je peux t'aider ? | Is something wrong? Can I help?
+      Ne t'en fais pas, ça va s'arranger. | Don't worry, it'll work out.
+      Tu as fait du bon travail. | You did a great job.
+      Merci pour ton aide, c'est vraiment sympa. | Thanks for your help, I really appreciate it.
+      De rien, c'est normal. | No problem, happy to help.
+      Je te dois un café ! | I owe you a coffee!
+      Excuse-moi de te déranger. | Sorry to bother you.
+      Je ne te dérange pas longtemps. | I won't keep you long.
+      On en parle après la réunion ? | Can we talk about it after the meeting?
+      Tu es disponible cet après-midi ? | Are you available this afternoon?
+      Je te tiens au courant. | I'll keep you posted.
+      Tu peux me transférer le message ? | Can you forward me the message?
+      Je n'ai pas eu le temps de regarder. | I haven't had time to look at it.
+      C'est urgent ou ça peut attendre demain ? | Is it urgent, or can it wait until tomorrow?
+      La salle de réunion est déjà prise. | The meeting room is already taken.
+      Le wifi ne marche pas, ce matin. | The Wi-Fi isn't working this morning.
+      Mon ordinateur est très lent aujourd'hui. | My computer is really slow today.
+      Tu as un chargeur à me prêter ? | Do you have a charger I could borrow?
+      Je sors prendre l'air cinq minutes. | I'm stepping out for some fresh air for five minutes.
+      Je pars un peu plus tôt aujourd'hui. | I'm leaving a little early today.
+      On prend un verre après le travail ? | Shall we grab a drink after work?
+      À lundi, repose-toi bien ! | See you Monday, get some rest!
+      Allez, bon courage pour la fin de la journée ! | Hang in there for the rest of the day!
     `) },
   { id: 'en', name: 'Entretien d\'embauche', emoji: '💼', color: '#2F6FD8',
     desc: 'Se présenter, convaincre, poser les bonnes questions.',
     phrases: lines(`
-      Bonjour, merci de me recevoir.
-      J'ai rendez-vous à dix heures avec madame Martin.
-      Je vais me présenter en quelques mots.
-      J'ai cinq ans d'expérience dans la vente.
-      J'ai travaillé trois ans dans une galerie d'art.
-      J'ai fait mes études à l'université.
-      Je parle anglais couramment.
-      J'apprends le français depuis deux ans.
-      Ce poste m'intéresse beaucoup.
-      Votre entreprise a une excellente réputation.
-      Je suis quelqu'un de sérieux et de motivé.
-      J'aime travailler en équipe.
-      Je suis à l'aise avec les clients.
-      Je m'adapte facilement.
-      J'apprends vite.
-      Je sais rester calme sous pression.
-      Mon point fort, c'est l'organisation.
-      Je dois encore améliorer mon français écrit.
-      Dans mon dernier poste, je gérais une équipe de quatre personnes.
-      J'ai quitté mon dernier emploi pour évoluer.
-      Je cherche un poste avec plus de responsabilités.
-      Ce projet me motive énormément.
-      Je suis disponible immédiatement.
-      Je peux commencer dès lundi.
-      Quelles sont les principales missions du poste ?
-      À quoi ressemble une journée type ?
-      Avec qui est-ce que je vais travailler ?
-      Quels sont les horaires de travail ?
-      Est-ce qu'il est possible de faire du télétravail ?
-      Y a-t-il des possibilités d'évolution ?
-      Quelle est la rémunération prévue pour ce poste ?
-      On peut en discuter, bien sûr.
-      Pouvez-vous préciser votre question ?
-      C'est une très bonne question.
-      Laissez-moi réfléchir un instant.
-      Voici mon CV et ma lettre de motivation.
-      Je peux vous fournir des références.
-      Quelle est la prochaine étape du recrutement ?
-      Merci beaucoup pour cet entretien.
-      J'espère avoir bientôt de vos nouvelles.
-      J'ai trouvé vos bureaux sans difficulté.
-      J'ai postulé à l'offre publiée sur votre site.
-      J'ai vu votre annonce la semaine dernière.
-      Je suis actuellement en poste.
-      Je suis à la recherche d'un emploi depuis un mois.
-      J'ai un diplôme en commerce.
-      J'ai suivi une formation en gestion de projet.
-      J'ai fait un stage de six mois à l'étranger.
-      J'ai commencé ma carrière dans un petit magasin.
-      J'ai travaillé dans plusieurs pays.
-      Je maîtrise bien les outils informatiques.
-      Je parle trois langues.
-      Mon niveau de français s'améliore chaque jour.
-      Je comprends presque tout, mais je parle encore lentement.
-      J'ai l'habitude de travailler avec des délais serrés.
-      Je suis très à l'aise au téléphone.
-      J'aime le contact avec le public.
-      J'ai le sens des responsabilités.
-      Je suis capable de travailler en autonomie.
-      Je sais gérer les priorités.
-      J'aime apprendre de nouvelles choses.
-      On dit de moi que je suis fiable.
-      Je garde toujours le sourire.
-      Mon principal défaut, c'est que je suis trop perfectionniste.
-      J'ai parfois du mal à déléguer.
-      J'ai appris de mes erreurs.
-      Ma plus grande réussite, c'est d'avoir ouvert une boutique.
-      J'ai augmenté les ventes de vingt pour cent.
-      J'ai formé plusieurs nouveaux collègues.
-      J'ai organisé un événement pour deux cents personnes.
-      Je connais bien vos produits.
-      J'ai lu beaucoup de choses sur votre entreprise.
-      Vos valeurs correspondent aux miennes.
-      Je pense pouvoir apporter beaucoup à votre équipe.
-      Je voudrais développer mes compétences.
-      Dans cinq ans, j'aimerais diriger une équipe.
-      J'ai envie de me former.
-      Je suis mobile et j'ai le permis de conduire.
-      Les déplacements ne me posent aucun problème.
-      Je peux travailler le samedi.
-      J'ai un préavis d'un mois.
-      Quel type de contrat proposez-vous ?
-      C'est un contrat à durée indéterminée ?
-      Combien de personnes y a-t-il dans l'équipe ?
-      Qui sera mon responsable ?
-      Y a-t-il une période d'essai ?
-      Quand pensez-vous prendre votre décision ?
-      Quels sont les avantages proposés ?
-      Est-ce qu'une formation est prévue à l'arrivée ?
-      Comment décririez-vous l'ambiance de travail ?
-      Pardon, pourriez-vous reformuler ?
-      Je ne sais pas si j'ai bien compris.
-      Pour répondre à votre question, je dirais oui.
-      Je vais vous donner un exemple concret.
-      C'est exactement ce que je recherche.
-      Je pense vraiment être la bonne personne pour ce poste.
-      Je reste à votre disposition pour toute information.
-      Vous pouvez me joindre par téléphone ou par e-mail.
-      Je vous souhaite une excellente fin de journée.
-      Au revoir, et encore merci pour votre temps.
+      Bonjour, merci de me recevoir. | Hello, thank you for seeing me.
+      J'ai rendez-vous à dix heures avec madame Martin. | I have a ten o'clock appointment with Ms. Martin.
+      Je vais me présenter en quelques mots. | Let me briefly introduce myself.
+      J'ai cinq ans d'expérience dans la vente. | I have five years of experience in sales.
+      J'ai travaillé trois ans dans une galerie d'art. | I worked in an art gallery for three years.
+      J'ai fait mes études à l'université. | I went to university.
+      Je parle anglais couramment. | I speak fluent English.
+      J'apprends le français depuis deux ans. | I've been learning French for two years.
+      Ce poste m'intéresse beaucoup. | I'm very interested in this position.
+      Votre entreprise a une excellente réputation. | Your company has an excellent reputation.
+      Je suis quelqu'un de sérieux et de motivé. | I'm a dependable, motivated person.
+      J'aime travailler en équipe. | I enjoy working as part of a team.
+      Je suis à l'aise avec les clients. | I'm comfortable dealing with customers.
+      Je m'adapte facilement. | I adapt easily.
+      J'apprends vite. | I'm a fast learner.
+      Je sais rester calme sous pression. | I stay calm under pressure.
+      Mon point fort, c'est l'organisation. | My greatest strength is being organized.
+      Je dois encore améliorer mon français écrit. | I still need to improve my written French.
+      Dans mon dernier poste, je gérais une équipe de quatre personnes. | In my last job, I managed a team of four.
+      J'ai quitté mon dernier emploi pour évoluer. | I left my last job to move forward in my career.
+      Je cherche un poste avec plus de responsabilités. | I'm looking for a position with more responsibility.
+      Ce projet me motive énormément. | I'm really excited about this project.
+      Je suis disponible immédiatement. | I'm available immediately.
+      Je peux commencer dès lundi. | I can start as early as Monday.
+      Quelles sont les principales missions du poste ? | What are the main responsibilities of the role?
+      À quoi ressemble une journée type ? | What does a typical day look like?
+      Avec qui est-ce que je vais travailler ? | Who will I be working with?
+      Quels sont les horaires de travail ? | What are the working hours?
+      Est-ce qu'il est possible de faire du télétravail ? | Is it possible to work from home?
+      Y a-t-il des possibilités d'évolution ? | Are there opportunities for advancement?
+      Quelle est la rémunération prévue pour ce poste ? | What salary are you offering for this position?
+      On peut en discuter, bien sûr. | We can discuss that, of course.
+      Pouvez-vous préciser votre question ? | Could you clarify your question?
+      C'est une très bonne question. | That's a very good question.
+      Laissez-moi réfléchir un instant. | Let me think about that for a moment.
+      Voici mon CV et ma lettre de motivation. | Here's my résumé and cover letter.
+      Je peux vous fournir des références. | I can provide references.
+      Quelle est la prochaine étape du recrutement ? | What's the next step in the hiring process?
+      Merci beaucoup pour cet entretien. | Thank you very much for this interview.
+      J'espère avoir bientôt de vos nouvelles. | I hope to hear from you soon.
+      J'ai trouvé vos bureaux sans difficulté. | I had no trouble finding your office.
+      J'ai postulé à l'offre publiée sur votre site. | I applied for the job posted on your website.
+      J'ai vu votre annonce la semaine dernière. | I saw your ad last week.
+      Je suis actuellement en poste. | I'm currently employed.
+      Je suis à la recherche d'un emploi depuis un mois. | I've been looking for a job for a month.
+      J'ai un diplôme en commerce. | I have a degree in business.
+      J'ai suivi une formation en gestion de projet. | I completed training in project management.
+      J'ai fait un stage de six mois à l'étranger. | I did a six-month internship abroad.
+      J'ai commencé ma carrière dans un petit magasin. | I started my career in a small shop.
+      J'ai travaillé dans plusieurs pays. | I've worked in several countries.
+      Je maîtrise bien les outils informatiques. | I have strong computer skills.
+      Je parle trois langues. | I speak three languages.
+      Mon niveau de français s'améliore chaque jour. | My French is getting better every day.
+      Je comprends presque tout, mais je parle encore lentement. | I understand almost everything, but I still speak slowly.
+      J'ai l'habitude de travailler avec des délais serrés. | I'm used to working to tight deadlines.
+      Je suis très à l'aise au téléphone. | I'm very comfortable on the phone.
+      J'aime le contact avec le public. | I enjoy dealing with the public.
+      J'ai le sens des responsabilités. | I have a strong sense of responsibility.
+      Je suis capable de travailler en autonomie. | I can work independently.
+      Je sais gérer les priorités. | I know how to prioritize.
+      J'aime apprendre de nouvelles choses. | I love learning new things.
+      On dit de moi que je suis fiable. | People say I'm reliable.
+      Je garde toujours le sourire. | I always keep a smile on my face.
+      Mon principal défaut, c'est que je suis trop perfectionniste. | My main weakness is that I'm too much of a perfectionist.
+      J'ai parfois du mal à déléguer. | I sometimes find it hard to delegate.
+      J'ai appris de mes erreurs. | I've learned from my mistakes.
+      Ma plus grande réussite, c'est d'avoir ouvert une boutique. | My proudest achievement is having opened a shop.
+      J'ai augmenté les ventes de vingt pour cent. | I increased sales by twenty percent.
+      J'ai formé plusieurs nouveaux collègues. | I've trained several new colleagues.
+      J'ai organisé un événement pour deux cents personnes. | I organized an event for two hundred people.
+      Je connais bien vos produits. | I know your products well.
+      J'ai lu beaucoup de choses sur votre entreprise. | I've read a lot about your company.
+      Vos valeurs correspondent aux miennes. | Your values match my own.
+      Je pense pouvoir apporter beaucoup à votre équipe. | I think I can bring a lot to your team.
+      Je voudrais développer mes compétences. | I'd like to develop my skills.
+      Dans cinq ans, j'aimerais diriger une équipe. | In five years, I'd like to be leading a team.
+      J'ai envie de me former. | I'm keen to get more training.
+      Je suis mobile et j'ai le permis de conduire. | I'm flexible about location and I have a driver's license.
+      Les déplacements ne me posent aucun problème. | Business travel is no problem for me.
+      Je peux travailler le samedi. | I can work Saturdays.
+      J'ai un préavis d'un mois. | I have a one-month notice period.
+      Quel type de contrat proposez-vous ? | What type of contract are you offering?
+      C'est un contrat à durée indéterminée ? | Is it a permanent contract?
+      Combien de personnes y a-t-il dans l'équipe ? | How many people are on the team?
+      Qui sera mon responsable ? | Who will I report to?
+      Y a-t-il une période d'essai ? | Is there a probationary period?
+      Quand pensez-vous prendre votre décision ? | When do you expect to make your decision?
+      Quels sont les avantages proposés ? | What benefits do you offer?
+      Est-ce qu'une formation est prévue à l'arrivée ? | Will there be training when I start?
+      Comment décririez-vous l'ambiance de travail ? | How would you describe the work atmosphere?
+      Pardon, pourriez-vous reformuler ? | Sorry, could you rephrase that?
+      Je ne sais pas si j'ai bien compris. | I'm not sure I understood correctly.
+      Pour répondre à votre question, je dirais oui. | To answer your question, I'd say yes.
+      Je vais vous donner un exemple concret. | Let me give you a concrete example.
+      C'est exactement ce que je recherche. | That's exactly what I'm looking for.
+      Je pense vraiment être la bonne personne pour ce poste. | I truly believe I'm the right person for this job.
+      Je reste à votre disposition pour toute information. | Please don't hesitate to contact me if you need any further information.
+      Vous pouvez me joindre par téléphone ou par e-mail. | You can reach me by phone or email.
+      Je vous souhaite une excellente fin de journée. | Have a great rest of your day.
+      Au revoir, et encore merci pour votre temps. | Goodbye, and thank you again for your time.
     `) },
   { id: 'em', name: 'Exprimer ses émotions au quotidien', emoji: '😊', color: '#E0533D',
     desc: 'Dire sa joie, ses peurs, sa colère, et réconforter les autres.',
     phrases: lines(`
-      Je suis vraiment content de te voir.
-      Ça me fait tellement plaisir !
-      Je suis de très bonne humeur aujourd'hui.
-      Je suis aux anges !
-      Quelle joie de vous retrouver !
-      Je suis tellement heureuse pour toi.
-      Ça m'a fait chaud au cœur.
-      Je suis fier de toi.
-      Je suis très fière de ce que j'ai accompli.
-      J'ai hâte d'être à demain !
-      Je suis impatient de commencer.
-      Je me sens bien ici.
-      Je me sens en pleine forme ce matin.
-      Ça me rend heureux.
-      J'ai le moral aujourd'hui.
-      Je n'ai pas le moral en ce moment.
-      Je me sens un peu triste aujourd'hui.
-      J'ai le cafard depuis hier.
-      J'ai envie de pleurer.
-      Ça me fait de la peine.
-      J'ai le cœur gros.
-      Tu me manques beaucoup.
-      Ma famille me manque.
-      Je me sens seul ces temps-ci.
-      J'ai le mal du pays.
-      Je suis déçu, je m'attendais à mieux.
-      Quelle déception !
-      C'est vraiment dommage.
-      Je suis en colère contre lui.
-      Ça m'énerve !
-      J'en ai assez !
-      J'en ai marre de cette situation.
-      Ça me met hors de moi.
-      Je suis furieux, il ne m'a même pas prévenu.
-      Tu m'as blessé avec tes mots.
-      Je n'ai pas apprécié ta remarque.
-      Ça m'agace quand on me coupe la parole.
-      Je suis de mauvaise humeur, désolé.
-      Laisse-moi tranquille, s'il te plaît.
-      J'ai besoin de me calmer.
-      J'ai peur de me tromper.
-      Ça me fait peur.
-      J'ai eu la peur de ma vie !
-      Je suis inquiet pour elle.
-      Ça m'inquiète un peu.
-      Je suis stressé en ce moment.
-      J'ai le trac avant de parler en public.
-      Je me fais du souci pour mon avenir.
-      Je suis angoissée à l'idée de passer cet examen.
-      Je n'arrive pas à dormir, je pense trop.
-      Je suis soulagé, tout s'est bien passé.
-      Ouf, quel soulagement !
-      Je me sens beaucoup mieux maintenant.
-      Ça m'a fait du bien de te parler.
-      Je n'en reviens pas !
-      Quelle surprise, je ne m'y attendais pas du tout !
-      Je suis sous le choc.
-      C'est incroyable, je n'arrive pas à y croire !
-      Tu plaisantes ?
-      Ça alors !
-      Je suis épuisé, je n'en peux plus.
-      Je suis débordée en ce moment.
-      Je me sens dépassé par les événements.
-      J'ai besoin de souffler un peu.
-      Je m'ennuie un peu ici.
-      Je suis gêné, je ne sais pas quoi dire.
-      J'ai honte de ce que j'ai dit.
-      Je me sens mal à l'aise.
-      Je suis désolé, je ne voulais pas te faire de peine.
-      Je regrette ce que j'ai fait.
-      Je m'en veux beaucoup.
-      Je suis jaloux, je l'avoue.
-      Je suis touché par ton message.
-      Ça me touche beaucoup, merci.
-      Je suis ému aux larmes.
-      Je t'aime de tout mon cœur.
-      Je tiens beaucoup à toi.
-      Je me sens bien avec toi.
-      Tu comptes énormément pour moi.
-      Je suis reconnaissant pour tout ce que tu fais.
-      Comment tu te sens aujourd'hui ?
-      Qu'est-ce qui ne va pas ?
-      Tu as l'air soucieux, tout va bien ?
-      Tu veux en parler ?
-      Je suis là si tu as besoin de moi.
-      Je comprends ce que tu ressens.
-      Ça va aller, courage !
-      Ne t'inquiète pas, tout va rentrer dans l'ordre.
-      Tu as le droit d'être triste.
-      Prends ton temps, rien ne presse.
-      Je suis de tout cœur avec toi.
-      Ce n'est pas de ta faute.
-      J'ai besoin d'un peu de temps pour moi.
-      J'ai besoin qu'on m'écoute.
-      Je ne sais pas trop ce que je ressens.
-      J'ai du mal à exprimer mes émotions.
-      Je me sens partagé entre la joie et la tristesse.
-      Je suis nostalgique de mon enfance.
-      Aujourd'hui, je me sens plein d'espoir.
-      Parler de ce que je ressens me fait du bien.
+      Je suis vraiment content de te voir. | I'm really happy to see you.
+      Ça me fait tellement plaisir ! | That makes me so happy!
+      Je suis de très bonne humeur aujourd'hui. | I'm in a great mood today.
+      Je suis aux anges ! | I'm over the moon!
+      Quelle joie de vous retrouver ! | It's such a joy to see you all again!
+      Je suis tellement heureuse pour toi. | I'm so happy for you.
+      Ça m'a fait chaud au cœur. | That really warmed my heart.
+      Je suis fier de toi. | I'm proud of you.
+      Je suis très fière de ce que j'ai accompli. | I'm very proud of what I've accomplished.
+      J'ai hâte d'être à demain ! | I can't wait for tomorrow!
+      Je suis impatient de commencer. | I can't wait to get started.
+      Je me sens bien ici. | I feel good here.
+      Je me sens en pleine forme ce matin. | I feel great this morning.
+      Ça me rend heureux. | It makes me happy.
+      J'ai le moral aujourd'hui. | I'm in good spirits today.
+      Je n'ai pas le moral en ce moment. | I'm feeling down these days.
+      Je me sens un peu triste aujourd'hui. | I'm feeling a little sad today.
+      J'ai le cafard depuis hier. | I've been feeling blue since yesterday.
+      J'ai envie de pleurer. | I feel like crying.
+      Ça me fait de la peine. | That makes me sad.
+      J'ai le cœur gros. | My heart is heavy.
+      Tu me manques beaucoup. | I miss you so much.
+      Ma famille me manque. | I miss my family.
+      Je me sens seul ces temps-ci. | I've been feeling lonely lately.
+      J'ai le mal du pays. | I'm homesick.
+      Je suis déçu, je m'attendais à mieux. | I'm disappointed, I was expecting better.
+      Quelle déception ! | What a letdown!
+      C'est vraiment dommage. | That's a real shame.
+      Je suis en colère contre lui. | I'm angry with him.
+      Ça m'énerve ! | That gets on my nerves!
+      J'en ai assez ! | I've had enough!
+      J'en ai marre de cette situation. | I'm fed up with this situation.
+      Ça me met hors de moi. | It makes my blood boil.
+      Je suis furieux, il ne m'a même pas prévenu. | I'm furious, he didn't even let me know.
+      Tu m'as blessé avec tes mots. | Your words hurt me.
+      Je n'ai pas apprécié ta remarque. | I didn't appreciate your comment.
+      Ça m'agace quand on me coupe la parole. | It annoys me when people interrupt me.
+      Je suis de mauvaise humeur, désolé. | I'm in a bad mood, sorry.
+      Laisse-moi tranquille, s'il te plaît. | Leave me alone, please.
+      J'ai besoin de me calmer. | I need to calm down.
+      J'ai peur de me tromper. | I'm afraid of making a mistake.
+      Ça me fait peur. | That scares me.
+      J'ai eu la peur de ma vie ! | I got the fright of my life!
+      Je suis inquiet pour elle. | I'm worried about her.
+      Ça m'inquiète un peu. | That worries me a little.
+      Je suis stressé en ce moment. | I'm stressed out right now.
+      J'ai le trac avant de parler en public. | I get stage fright before speaking in public.
+      Je me fais du souci pour mon avenir. | I worry about my future.
+      Je suis angoissée à l'idée de passer cet examen. | I'm anxious about taking this exam.
+      Je n'arrive pas à dormir, je pense trop. | I can't sleep, I'm overthinking everything.
+      Je suis soulagé, tout s'est bien passé. | I'm relieved, everything went well.
+      Ouf, quel soulagement ! | Phew, what a relief!
+      Je me sens beaucoup mieux maintenant. | I feel so much better now.
+      Ça m'a fait du bien de te parler. | It did me good to talk to you.
+      Je n'en reviens pas ! | I can't get over it!
+      Quelle surprise, je ne m'y attendais pas du tout ! | What a surprise, I wasn't expecting that at all!
+      Je suis sous le choc. | I'm in shock.
+      C'est incroyable, je n'arrive pas à y croire ! | It's incredible, I can't believe it!
+      Tu plaisantes ? | Are you kidding?
+      Ça alors ! | Well, what do you know!
+      Je suis épuisé, je n'en peux plus. | I'm exhausted, I can't take any more.
+      Je suis débordée en ce moment. | I'm swamped at the moment.
+      Je me sens dépassé par les événements. | I feel overwhelmed by everything that's going on.
+      J'ai besoin de souffler un peu. | I need to take a breather.
+      Je m'ennuie un peu ici. | I'm a little bored here.
+      Je suis gêné, je ne sais pas quoi dire. | I'm embarrassed, I don't know what to say.
+      J'ai honte de ce que j'ai dit. | I'm ashamed of what I said.
+      Je me sens mal à l'aise. | I feel uncomfortable.
+      Je suis désolé, je ne voulais pas te faire de peine. | I'm sorry, I didn't mean to hurt you.
+      Je regrette ce que j'ai fait. | I regret what I did.
+      Je m'en veux beaucoup. | I feel terrible about it.
+      Je suis jaloux, je l'avoue. | I'm jealous, I admit it.
+      Je suis touché par ton message. | I'm touched by your message.
+      Ça me touche beaucoup, merci. | That means a lot to me, thank you.
+      Je suis ému aux larmes. | I'm moved to tears.
+      Je t'aime de tout mon cœur. | I love you with all my heart.
+      Je tiens beaucoup à toi. | I care about you a lot.
+      Je me sens bien avec toi. | I feel good when I'm with you.
+      Tu comptes énormément pour moi. | You mean the world to me.
+      Je suis reconnaissant pour tout ce que tu fais. | I'm grateful for everything you do.
+      Comment tu te sens aujourd'hui ? | How are you feeling today?
+      Qu'est-ce qui ne va pas ? | What's wrong?
+      Tu as l'air soucieux, tout va bien ? | You look worried, is everything okay?
+      Tu veux en parler ? | Do you want to talk about it?
+      Je suis là si tu as besoin de moi. | I'm here if you need me.
+      Je comprends ce que tu ressens. | I understand how you feel.
+      Ça va aller, courage ! | It's going to be okay, hang in there!
+      Ne t'inquiète pas, tout va rentrer dans l'ordre. | Don't worry, everything will be back to normal soon.
+      Tu as le droit d'être triste. | It's okay to be sad.
+      Prends ton temps, rien ne presse. | Take your time, there's no rush.
+      Je suis de tout cœur avec toi. | My heart goes out to you.
+      Ce n'est pas de ta faute. | It's not your fault.
+      J'ai besoin d'un peu de temps pour moi. | I need a little time to myself.
+      J'ai besoin qu'on m'écoute. | I need someone to listen to me.
+      Je ne sais pas trop ce que je ressens. | I'm not really sure what I'm feeling.
+      J'ai du mal à exprimer mes émotions. | I have a hard time expressing my emotions.
+      Je me sens partagé entre la joie et la tristesse. | I feel torn between joy and sadness.
+      Je suis nostalgique de mon enfance. | I feel nostalgic about my childhood.
+      Aujourd'hui, je me sens plein d'espoir. | Today, I feel full of hope.
+      Parler de ce que je ressens me fait du bien. | Talking about how I feel does me good.
     `) },
   { id: 'cn', name: 'Convaincre & Négocier', emoji: '⚖️', color: '#8C9A2B',
     desc: 'Argumenter, répondre aux objections, trouver un accord.',
     phrases: lines(`
-      Je suis convaincu que c'est la meilleure solution.
-      À mon avis, nous devrions essayer.
-      Laissez-moi vous expliquer pourquoi.
-      J'ai une proposition à vous faire.
-      Voici ce que je vous propose.
-      Écoutez d'abord mon idée, s'il vous plaît.
-      Je pense que tout le monde y gagnerait.
-      Les chiffres parlent d'eux-mêmes.
-      Permettez-moi de vous donner un exemple.
-      Croyez-moi, ça vaut vraiment la peine.
-      Fais-moi confiance, tu ne le regretteras pas.
-      Regardons les avantages ensemble.
-      Le principal avantage, c'est le gain de temps.
-      Cette solution vous fera économiser de l'argent.
-      C'est une occasion à ne pas manquer.
-      Allez, viens avec nous, ça va te plaire !
-      Nos clients sont très satisfaits.
-      Qu'est-ce qui vous fait hésiter ?
-      Qu'est-ce qui pourrait vous faire changer d'avis ?
-      Quelles sont vos priorités ?
-      De quoi avez-vous besoin exactement ?
-      Je comprends votre point de vue.
-      Je vois ce que vous voulez dire, mais je ne suis pas d'accord.
-      Vous avez raison sur ce point.
-      C'est vrai, cependant il y a un autre aspect.
-      Je me permets d'insister.
-      Permettez-moi de ne pas partager cet avis.
-      Je ne suis pas tout à fait d'accord avec vous.
-      Au contraire, je pense que c'est le bon moment.
-      D'un côté, c'est cher, de l'autre, c'est durable.
-      Il faut peser le pour et le contre.
-      Pensez-y, cela mérite réflexion.
-      Imaginez les résultats dans six mois.
-      Qu'avez-vous à perdre ?
-      Essayons pendant un mois, puis faisons le point.
-      Si ça ne vous convient pas, on arrête.
-      C'est sans engagement.
-      Je vous garantis un résultat rapide.
-      Je m'engage à respecter les délais.
-      Vous avez ma parole.
-      Le prix me semble un peu élevé.
-      C'est au-dessus de mon budget.
-      Pouvez-vous me faire un meilleur prix ?
-      Est-ce que le prix est négociable ?
-      Quel est votre dernier prix ?
-      Vous pouvez faire un geste ?
-      Si j'en prends deux, vous me faites une réduction ?
-      Je peux vous proposer dix pour cent de remise.
-      C'est ma dernière offre.
-      Je ne peux pas descendre plus bas.
-      À ce prix-là, je le prends tout de suite.
-      Votre concurrent propose moins cher.
-      La livraison est-elle comprise dans le prix ?
-      Pouvez-vous inclure l'installation ?
-      Est-il possible de payer en plusieurs fois ?
-      Je vous propose de couper la poire en deux.
-      Trouvons un compromis.
-      Chacun doit faire un effort.
-      Je suis prêt à faire une concession.
-      En échange, j'aimerais un délai plus long.
-      Si vous acceptez, je signe aujourd'hui.
-      À quelles conditions seriez-vous d'accord ?
-      Qu'est-ce que vous proposez en échange ?
-      Cela me paraît équitable.
-      Ce n'est pas tout à fait ce que j'espérais.
-      Je dois en parler à mon responsable.
-      J'ai besoin d'un peu de temps pour réfléchir.
-      Pouvez-vous m'envoyer votre proposition par écrit ?
-      Je vous donne ma réponse avant vendredi.
-      Je voudrais renégocier mon contrat.
-      J'aimerais discuter de mon salaire.
-      Je souhaiterais une augmentation.
-      Compte tenu de mes résultats, cela me semble justifié.
-      J'ai pris de nouvelles responsabilités cette année.
-      Quelle marge de manœuvre avez-vous ?
-      Pourrait-on repousser la date limite ?
-      Il me faudrait une semaine de plus.
-      Je peux le faire, mais pas avant lundi.
-      C'est possible, à une condition.
-      Malheureusement, c'est non négociable.
-      Je regrette, je ne peux pas accepter.
-      Je crains que ce soit impossible.
-      Revenons à l'essentiel.
-      Mettons-nous d'accord sur les grandes lignes.
-      Sur quels points sommes-nous d'accord ?
-      Résumons ce que nous avons décidé.
-      Il reste un dernier point à régler.
-      Est-ce que cette solution convient à tout le monde ?
-      Vous m'avez convaincu.
-      C'est un bon argument.
-      Ça me paraît raisonnable.
-      Alors, marché conclu ?
-      Parfait, nous sommes d'accord.
-      Nous avons trouvé un terrain d'entente.
-      C'est un accord gagnant-gagnant.
-      Je vous confirme tout cela par e-mail.
-      Il ne reste plus qu'à signer.
-      Je suis ravi que nous ayons trouvé un accord.
-      Merci pour votre confiance.
-      C'est un plaisir de faire affaire avec vous.
+      Je suis convaincu que c'est la meilleure solution. | I'm convinced this is the best solution.
+      À mon avis, nous devrions essayer. | In my opinion, we should give it a try.
+      Laissez-moi vous expliquer pourquoi. | Let me explain why.
+      J'ai une proposition à vous faire. | I have a proposal for you.
+      Voici ce que je vous propose. | Here's what I suggest.
+      Écoutez d'abord mon idée, s'il vous plaît. | Please hear my idea out first.
+      Je pense que tout le monde y gagnerait. | I think everyone would benefit.
+      Les chiffres parlent d'eux-mêmes. | The numbers speak for themselves.
+      Permettez-moi de vous donner un exemple. | Let me give you an example.
+      Croyez-moi, ça vaut vraiment la peine. | Believe me, it's really worth it.
+      Fais-moi confiance, tu ne le regretteras pas. | Trust me, you won't regret it.
+      Regardons les avantages ensemble. | Let's look at the advantages together.
+      Le principal avantage, c'est le gain de temps. | The main advantage is that it saves time.
+      Cette solution vous fera économiser de l'argent. | This solution will save you money.
+      C'est une occasion à ne pas manquer. | It's an opportunity not to be missed.
+      Allez, viens avec nous, ça va te plaire ! | Come on, come with us, you'll love it!
+      Nos clients sont très satisfaits. | Our customers are very satisfied.
+      Qu'est-ce qui vous fait hésiter ? | What's making you hesitate?
+      Qu'est-ce qui pourrait vous faire changer d'avis ? | What would it take to change your mind?
+      Quelles sont vos priorités ? | What are your priorities?
+      De quoi avez-vous besoin exactement ? | What exactly do you need?
+      Je comprends votre point de vue. | I understand your point of view.
+      Je vois ce que vous voulez dire, mais je ne suis pas d'accord. | I see what you mean, but I don't agree.
+      Vous avez raison sur ce point. | You're right about that.
+      C'est vrai, cependant il y a un autre aspect. | That's true, but there's another side to it.
+      Je me permets d'insister. | I really must insist.
+      Permettez-moi de ne pas partager cet avis. | I'm afraid I don't share that view.
+      Je ne suis pas tout à fait d'accord avec vous. | I don't entirely agree with you.
+      Au contraire, je pense que c'est le bon moment. | On the contrary, I think now is the right time.
+      D'un côté, c'est cher, de l'autre, c'est durable. | On the one hand it's expensive, on the other it's built to last.
+      Il faut peser le pour et le contre. | We need to weigh the pros and cons.
+      Pensez-y, cela mérite réflexion. | Think it over, it's worth considering.
+      Imaginez les résultats dans six mois. | Imagine the results six months from now.
+      Qu'avez-vous à perdre ? | What do you have to lose?
+      Essayons pendant un mois, puis faisons le point. | Let's try it for a month, then take stock.
+      Si ça ne vous convient pas, on arrête. | If it doesn't work for you, we'll stop.
+      C'est sans engagement. | There's no obligation.
+      Je vous garantis un résultat rapide. | I guarantee you'll see results quickly.
+      Je m'engage à respecter les délais. | I commit to meeting the deadlines.
+      Vous avez ma parole. | You have my word.
+      Le prix me semble un peu élevé. | The price seems a little high to me.
+      C'est au-dessus de mon budget. | It's over my budget.
+      Pouvez-vous me faire un meilleur prix ? | Can you give me a better price?
+      Est-ce que le prix est négociable ? | Is the price negotiable?
+      Quel est votre dernier prix ? | What's your best price?
+      Vous pouvez faire un geste ? | Is there anything you can do on the price?
+      Si j'en prends deux, vous me faites une réduction ? | If I take two, will you give me a discount?
+      Je peux vous proposer dix pour cent de remise. | I can offer you ten percent off.
+      C'est ma dernière offre. | That's my final offer.
+      Je ne peux pas descendre plus bas. | I can't go any lower.
+      À ce prix-là, je le prends tout de suite. | At that price, I'll take it right now.
+      Votre concurrent propose moins cher. | Your competitor is offering a lower price.
+      La livraison est-elle comprise dans le prix ? | Is delivery included in the price?
+      Pouvez-vous inclure l'installation ? | Can you include installation?
+      Est-il possible de payer en plusieurs fois ? | Is it possible to pay in installments?
+      Je vous propose de couper la poire en deux. | I suggest we split the difference.
+      Trouvons un compromis. | Let's find a compromise.
+      Chacun doit faire un effort. | We each need to give a little.
+      Je suis prêt à faire une concession. | I'm willing to make a concession.
+      En échange, j'aimerais un délai plus long. | In exchange, I'd like more time.
+      Si vous acceptez, je signe aujourd'hui. | If you agree, I'll sign today.
+      À quelles conditions seriez-vous d'accord ? | Under what conditions would you agree?
+      Qu'est-ce que vous proposez en échange ? | What are you offering in return?
+      Cela me paraît équitable. | That seems fair to me.
+      Ce n'est pas tout à fait ce que j'espérais. | It's not quite what I was hoping for.
+      Je dois en parler à mon responsable. | I need to run it by my manager.
+      J'ai besoin d'un peu de temps pour réfléchir. | I need a little time to think it over.
+      Pouvez-vous m'envoyer votre proposition par écrit ? | Could you send me your proposal in writing?
+      Je vous donne ma réponse avant vendredi. | I'll give you my answer by Friday.
+      Je voudrais renégocier mon contrat. | I'd like to renegotiate my contract.
+      J'aimerais discuter de mon salaire. | I'd like to discuss my salary.
+      Je souhaiterais une augmentation. | I'd like to ask for a raise.
+      Compte tenu de mes résultats, cela me semble justifié. | Given my results, I think it's justified.
+      J'ai pris de nouvelles responsabilités cette année. | I've taken on new responsibilities this year.
+      Quelle marge de manœuvre avez-vous ? | How much flexibility do you have?
+      Pourrait-on repousser la date limite ? | Could we push back the deadline?
+      Il me faudrait une semaine de plus. | I'd need one more week.
+      Je peux le faire, mais pas avant lundi. | I can do it, but not before Monday.
+      C'est possible, à une condition. | It's possible, on one condition.
+      Malheureusement, c'est non négociable. | Unfortunately, that's non-negotiable.
+      Je regrette, je ne peux pas accepter. | I'm sorry, I can't accept that.
+      Je crains que ce soit impossible. | I'm afraid that's impossible.
+      Revenons à l'essentiel. | Let's get back to the main point.
+      Mettons-nous d'accord sur les grandes lignes. | Let's agree on the broad outlines.
+      Sur quels points sommes-nous d'accord ? | Which points do we agree on?
+      Résumons ce que nous avons décidé. | Let's sum up what we've decided.
+      Il reste un dernier point à régler. | There's one last point to settle.
+      Est-ce que cette solution convient à tout le monde ? | Does this solution work for everyone?
+      Vous m'avez convaincu. | You've convinced me.
+      C'est un bon argument. | That's a good point.
+      Ça me paraît raisonnable. | That sounds reasonable to me.
+      Alors, marché conclu ? | So, do we have a deal?
+      Parfait, nous sommes d'accord. | Great, then we're agreed.
+      Nous avons trouvé un terrain d'entente. | We've found common ground.
+      C'est un accord gagnant-gagnant. | It's a win-win deal.
+      Je vous confirme tout cela par e-mail. | I'll confirm all of this by email.
+      Il ne reste plus qu'à signer. | All that's left is to sign.
+      Je suis ravi que nous ayons trouvé un accord. | I'm delighted we've reached an agreement.
+      Merci pour votre confiance. | Thank you for your trust.
+      C'est un plaisir de faire affaire avec vous. | It's a pleasure doing business with you.
     `) },
 ];
-CATS.forEach(c => { c.phrases = c.phrases.map((text, i) => ({ id: c.id + String(i + 1).padStart(2, '0'), text, cat: c.id })); });
+CATS.forEach(c => {
+  c.phrases = c.phrases.map((line, i) => {
+    const [text, en = ''] = line.split('|').map(part => part.trim());
+    return { id: c.id + String(i + 1).padStart(2, '0'), text, en, cat: c.id };
+  });
+});
 const ALL = CATS.flatMap(c => c.phrases);
+const byId = id => ALL.find(p => p.id === id);
 const catById = id => CATS.find(c => c.id === id);
 
 /* ───────────────────────── Succès ───────────────────────── */
@@ -1214,7 +1229,7 @@ function validate(p, mode, score) {
   if (!day.reached && day.ids.length >= state.settings.goal) { day.reached = true; goalNow = true; }
   if (now.getHours() < 8) state.counters.early = 1;
   if (now.getHours() >= 22) state.counters.late = 1;
-  state.lastCat = cat.id;
+  if (!view.mix) state.lastCat = cat.id;
   const newBadges = checkBadges();
   save();
   return { first, stars, goalNow, newBadges, catDone: first && catProgress(cat).done === cat.phrases.length };
@@ -1542,7 +1557,8 @@ function finishTake(t) {
 function applyValidation(p, mode, score) {
   const out = validate(p, mode, score);
   if (result) { result.validated = true; result.stars = out.stars; }
-  if (out.catDone) view.justDone = true;
+  if (view.mix) { view.mix.ok[p.id] = Math.max(view.mix.ok[p.id] || 0, out.stars); saveMix(); }
+  else if (out.catDone) view.justDone = true;
   if (result?.blob) { Takes.put(p.id, result.blob); }
   sound(out.goalNow ? 'goal' : 'ok');
   renderPractice();
@@ -1611,8 +1627,33 @@ const ICON = {
   bubble: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 4h14a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-6l-5 4v-4H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/></svg>',
 };
 
+/* Modes au hasard, tous thèmes confondus : « rapide » (5 phrases) et « illimité » (sans fin).
+   Une phrase validée ici compte comme dans son thème. La série en cours est gardée le temps de
+   la session du navigateur, pour survivre à un rechargement. */
+const MIX = { rapide: { name: 'Mode rapide', emoji: '⚡', size: 5 }, illimite: { name: 'Mode illimité', emoji: '♾️', size: 0 } };
+let mix = null; // { mode, ids: phrases tirées dans l'ordre, ok: { identifiant: étoiles obtenues pendant la série } }
+try {
+  const kept = JSON.parse(sessionStorage.getItem('parlons.mix'));
+  if (MIX[kept?.mode] && kept.ids?.length && kept.ids.every(byId) && kept.ok) mix = kept;
+} catch {}
+const saveMix = () => { try { sessionStorage.setItem('parlons.mix', JSON.stringify(mix)); } catch {} };
+function drawPhrase(used) {
+  let pool = ALL.filter(p => !used.includes(p.id));
+  if (!pool.length) pool = ALL.filter(p => p.id !== used[used.length - 1]); // tout a été tiré : on repart, sans redonner la même phrase
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+function newMix(mode) {
+  mix = { mode, ids: [], ok: {} };
+  for (let i = 0; i < (MIX[mode].size || 1); i++) mix.ids.push(drawPhrase(mix.ids));
+  saveMix();
+}
+
 function route() {
   const parts = location.hash.replace(/^#\/?/, '').split('/');
+  if (MIX[parts[0]]) {
+    const n = parseInt(parts[1], 10);
+    return { name: 'practice', mix: parts[0], idx: n >= 1 ? n - 1 : null, end: parts[1] === 'fin' };
+  }
   if (parts[0] === 'theme' && catById(parts[1])) {
     const cat = catById(parts[1]);
     const n = parseInt(parts[2], 10);
@@ -1622,8 +1663,8 @@ function route() {
   if (parts[0] === 'reglages') return { name: 'settings' };
   return { name: 'home' };
 }
-let view = { cat: null, idx: 0, list: false, end: false };
-const currentPhrase = () => (route().name === 'practice' && view.cat && !view.end ? view.cat.phrases[view.idx] : null);
+let view = { cat: null, idx: 0, list: false, end: false, mix: null };
+const currentPhrase = () => (route().name !== 'practice' || !view.cat || view.end ? null : view.mix ? byId(view.mix.ids[view.idx]) : view.cat.phrases[view.idx]);
 
 function header() {
   const r = route().name;
@@ -1670,6 +1711,9 @@ function homeHTML() {
     '<div><h2>' + line + '</h2><div class="hero-meta"><span class="chip' + (st ? ' fire' : '') + '">🔥 ' + st + ' jour' + (st > 1 ? 's' : '') + ' d\'affilée</span>' +
     '<span class="chip">🏆 ' + Object.keys(state.badges).length + ' succès</span></div>' + cta +
     '<div class="week" aria-label="Les sept derniers jours">' + days.join('') + '</div></div></section>' + promoHTML() +
+    '<div class="section-title"><h2>Au hasard</h2><span class="muted">tous les thèmes</span></div><div class="modes">' +
+    Object.entries(MIX).map(([id, m]) => '<a class="card mode" href="#/' + id + '"><span class="cat-emoji" aria-hidden="true">' + m.emoji + '</span><div><h3>' + m.name +
+      '</h3><p>' + (m.size ? m.size + ' phrases tirées au hasard.' : 'Des phrases au hasard, sans fin.') + '</p></div></a>').join('') + '</div>' +
     '<div class="section-title"><h2>Les thèmes</h2><span class="muted">' + done + ' / ' + ALL.length + ' phrases</span></div>' +
     '<div class="cats">' + CATS.map(c => {
       const pr = catProgress(c);
@@ -1793,15 +1837,27 @@ function settingsHTML() {
 
 /* ───────────────────────── Écran de pratique ───────────────────────── */
 function enterPractice(r) {
-  const changed = view.cat !== r.cat;
-  const firstUndone = r.cat.phrases.findIndex(p => !state.phrases[p.id]?.ok);
-  const idx = r.idx != null ? r.idx : firstUndone >= 0 ? firstUndone : 0;
-  if (changed || idx !== view.idx || r.end !== view.end) { cancelTake(); dropResult(); recErrorMsg = ''; TTS.stop(); player.pause(); }
-  view = { cat: r.cat, idx, end: r.end, list: changed ? false : view.list };
+  let cat = r.cat, idx = r.idx, end = r.end;
+  if (r.mix) {
+    if (!mix || mix.mode !== r.mix || (idx == null && !end)) { // nouvelle série
+      newMix(r.mix); idx = 0; end = false;
+      history.replaceState(null, '', '#/' + r.mix + '/1');
+    }
+    idx = end ? mix.ids.length - 1 : Math.min(idx, mix.ids.length - (MIX[r.mix].size ? 1 : 0));
+    if (idx === mix.ids.length) { mix.ids.push(drawPhrase(mix.ids)); saveMix(); } // mode illimité : la phrase suivante est tirée à la demande
+    cat = catById(byId(mix.ids[idx]).cat);
+  } else if (idx == null) {
+    const firstUndone = cat.phrases.findIndex(p => !state.phrases[p.id]?.ok);
+    idx = firstUndone >= 0 ? firstUndone : 0;
+  }
+  const session = r.mix ? mix : null;
+  const changed = view.mix !== session || (!session && view.cat !== cat);
+  if (changed || idx !== view.idx || end !== view.end) { cancelTake(); dropResult(); recErrorMsg = ''; TTS.stop(); player.pause(); }
+  view = { cat, idx, end, list: changed ? false : view.list, mix: session };
   if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
   renderPractice();
-  if (!r.end) {
-    const id = r.cat.phrases[idx].id;
+  if (!end) {
+    const id = currentPhrase().id;
     Takes.get(id).then(blob => {
       if (blob && currentPhrase()?.id === id && !savedUrl) { savedUrl = URL.createObjectURL(blob); renderPractice(); }
     });
@@ -1811,34 +1867,48 @@ function enterPractice(r) {
 function renderPractice() {
   if (route().name !== 'practice') return;
   const c = view.cat, pr = catProgress(c), n = todayCount(), goal = state.settings.goal;
-  const top = '<div class="p-top"><a class="icon-btn" href="#/" aria-label="Retour à l\'accueil">' + ICON.back + '</a><div class="p-title"><b>' + c.emoji + ' ' + esc(c.name) +
-    '</b><span>' + pr.done + ' / ' + pr.total + ' phrases validées</span></div><span class="day-pill' + (n >= goal ? ' done' : '') + '" title="Objectif du jour">🎯 ' + n + ' / ' + goal +
-    '</span><button class="icon-btn" data-act="toggle-list" aria-label="Liste des phrases" aria-expanded="' + view.list + '">' + ICON.list + '</button></div>' +
-    '<div class="bar p-bar" role="progressbar" aria-label="Progression du thème" aria-valuemin="0" aria-valuemax="' + pr.total + '" aria-valuenow="' + pr.done + '"><i style="width:' + (100 * pr.done / pr.total) + '%"></i></div>';
+  const m = view.mix, M = m && MIX[m.mode], okN = m ? Object.keys(m.ok).length : 0; // série au hasard : phrases validées pendant la série
+  const count = (k, total) => k + (total ? ' sur ' + total : '') + ' phrase' + (k > 1 || total ? 's' : '') + ' validée' + (k > 1 || total ? 's' : '');
+  const barMax = m ? M.size : pr.total, barNow = m ? okN : pr.done;
+  const top = '<div class="p-top"><a class="icon-btn" href="#/" aria-label="Retour à l\'accueil">' + ICON.back + '</a><div class="p-title"><b>' + (m ? M.emoji + ' ' + M.name : c.emoji + ' ' + esc(c.name)) +
+    '</b><span>' + (m ? count(okN, M.size) : pr.done + ' / ' + pr.total + ' phrases validées') + '</span></div><span class="day-pill' + (n >= goal ? ' done' : '') + '" title="Objectif du jour">🎯 ' + n + ' / ' + goal +
+    '</span>' + (m ? '' : '<button class="icon-btn" data-act="toggle-list" aria-label="Liste des phrases" aria-expanded="' + view.list + '">' + ICON.list + '</button>') + '</div>' +
+    (barMax ? '<div class="bar p-bar" role="progressbar" aria-label="Progression" aria-valuemin="0" aria-valuemax="' + barMax + '" aria-valuenow="' + barNow + '"><i style="width:' + (100 * barNow / barMax) + '%"></i></div>' : '');
   let body;
-  if (view.end) {
+  if (view.end && m) {
+    const stars = Object.values(m.ok).reduce((a, b) => a + b, 0);
+    body = '<div class="card finish"><div class="big">' + (okN ? '🎉' : '👋') + '</div><h2>' + (M.size ? 'Série terminée !' : 'Séance terminée !') + '</h2><p class="muted">' +
+      (okN ? count(okN, M.size) + ', ' + stars + ' étoile' + (stars > 1 ? 's' : '') + '.' : 'Aucune phrase validée cette fois-ci.') + '</p><div class="actions">' +
+      (M.size ? '<a class="btn primary" href="#/rapide">Encore ' + M.size + ' phrases →</a><a class="btn" href="#/illimite">' + MIX.illimite.emoji + ' ' + MIX.illimite.name + '</a>'
+        : '<a class="btn primary" href="#/illimite/' + (m.ids.length + 1) + '">Continuer →</a>') + '<a class="btn" href="#/">Accueil</a></div></div>';
+  } else if (view.end) {
     const other = CATS.find(x => catProgress(x).done < x.phrases.length);
     body = '<div class="card finish"><div class="big">🎉</div><h2>Thème terminé !</h2><p class="muted">' + pr.total + ' phrases validées, ' + pr.stars + ' étoiles sur ' + pr.total * 3 + '.</p>' +
       '<div class="actions">' + (other ? '<a class="btn primary" href="#/theme/' + other.id + '">Thème suivant : ' + esc(other.name) + ' →</a>' : '<a class="btn primary" href="#/succes">Voir mes succès</a>') +
       '<a class="btn" href="#/theme/' + c.id + '/1">Réviser ce thème</a></div></div>';
   } else {
-    const p = c.phrases[view.idx], ph = state.phrases[p.id];
-    body = '<div class="card phrase"><div class="phrase-num">Phrase ' + (view.idx + 1) + ' sur ' + c.phrases.length + (ph?.ok ? ' · ' + '★'.repeat(ph.stars || 1) : '') + '</div>' +
-      '<p class="phrase-text" lang="fr">' + phraseHTML(p) + '</p><div class="listen"><button class="btn" data-act="listen">🔊 Écouter</button>' +
+    const p = currentPhrase(), ph = state.phrases[p.id];
+    const prev = !m ? '#/theme/' + c.id + '/' + (view.idx > 0 ? view.idx : c.phrases.length) : view.idx > 0 ? '#/' + m.mode + '/' + view.idx : '';
+    body = '<div class="card phrase"><div class="phrase-num">Phrase ' + (view.idx + 1) + (m ? (M.size ? ' sur ' + M.size : '') + ' · ' + c.emoji + ' ' + esc(c.name) : ' sur ' + c.phrases.length) +
+      (ph?.ok ? ' · ' + '★'.repeat(ph.stars || 1) : '') + '</div>' +
+      '<p class="phrase-text" lang="fr">' + phraseHTML(p) + '</p>' + (p.en ? '<p class="phrase-en" lang="en">' + esc(p.en) + '</p>' : '') +
+      '<div class="listen"><button class="btn" data-act="listen">🔊 Écouter</button>' +
       '<button class="btn" data-act="listen-slow">🐢 Lentement</button>' + (savedUrl && !result ? '<button class="btn ghost" data-act="play-saved">▶ Mon dernier enregistrement</button>' : '') + '</div>' +
       (TTS.ok ? '' : '<p class="note">Ce navigateur ne peut pas lire le modèle à voix haute.</p>') + '</div>' +
       '<div class="card rec" id="recorder" aria-live="polite">' + recorderHTML() + '</div>' +
-      '<div class="p-nav"><a class="btn ghost small" href="#/theme/' + c.id + '/' + (view.idx > 0 ? view.idx : c.phrases.length) + '">← Précédente</a>' +
-      '<a class="btn ghost small" href="' + nextHref() + '">' + (ph?.ok ? 'Suivante' : 'Passer') + ' →</a></div>';
+      '<div class="p-nav">' + (prev ? '<a class="btn ghost small" href="' + prev + '">← Précédente</a>' : '<span></span>') +
+      (m && !M.size ? '<a class="btn ghost small" href="#/illimite/fin">Terminer</a>' : '') +
+      '<a class="btn ghost small" href="' + nextHref() + '">' + ((m ? p.id in m.ok : ph?.ok) ? 'Suivante' : 'Passer') + ' →</a></div>';
   }
-  const list = view.list ? '<nav class="card list" aria-label="Toutes les phrases du thème">' + c.phrases.map((p, i) => {
+  const list = view.list && !m ? '<nav class="card list" aria-label="Toutes les phrases du thème">' + c.phrases.map((p, i) => {
     const ph = state.phrases[p.id];
-    return '<a href="#/theme/' + c.id + '/' + (i + 1) + '"' + (!view.end && i === view.idx ? ' aria-current="true"' : '') + '><span class="n">' + (i + 1) + '</span><span>' + esc(pretty(p.text)) +
-      '</span><span class="s">' + (ph?.ok ? '★'.repeat(ph.stars || 1) : '') + '</span></a>';
+    return '<a href="#/theme/' + c.id + '/' + (i + 1) + '"' + (!view.end && i === view.idx ? ' aria-current="true"' : '') + '><span class="n">' + (i + 1) + '</span><span><span lang="fr">' + esc(pretty(p.text)) + '</span>' +
+      (p.en ? '<small lang="en">' + esc(p.en) + '</small>' : '') + '</span><span class="s">' + (ph?.ok ? '★'.repeat(ph.stars || 1) : '') + '</span></a>';
   }).join('') + '</nav>' : '';
   app.innerHTML = '<div class="shell" style="--c:' + c.color + '">' + top + body + list + '</div>';
 }
 function nextHref() {
+  if (view.mix) return '#/' + view.mix.mode + '/' + (MIX[view.mix.mode].size && view.idx + 1 >= MIX[view.mix.mode].size ? 'fin' : view.idx + 2);
   const c = view.cat, n = c.phrases.length;
   if (view.justDone) return '#/theme/' + c.id + '/fin';
   for (let k = 1; k <= n; k++) { const i = (view.idx + k) % n; if (!state.phrases[c.phrases[i].id]?.ok) return '#/theme/' + c.id + '/' + (i + 1); }
@@ -1870,7 +1940,7 @@ function resultHTML() {
   const r = result, p = currentPhrase();
   const compareBtns = '<div class="compare">' + (r.url ? '<button class="btn small" data-act="play-take">▶ Ma voix</button>' : '') + '<button class="btn small" data-act="listen">🔊 Le modèle</button></div>';
   const retry = '<button class="btn" data-act="record">↻ ' + (r.validated ? 'Refaire' : 'Réessayer') + '</button>';
-  const next = '<a class="btn primary" href="' + nextHref() + '" data-next>Phrase suivante →</a>';
+  const next = '<a class="btn primary" href="' + nextHref() + '" data-next>' + (nextHref().endsWith('/fin') ? 'Terminer' : 'Phrase suivante') + ' →</a>';
   if (r.nothing) {
     return '<div class="verdict low"><span class="dot">?</span>Je n\'ai rien entendu</div><p class="heard">Vérifiez votre micro et parlez un peu plus fort, près de l\'appareil.</p>' +
       '<div class="actions"><button class="btn primary" data-act="record">↻ Réessayer</button></div>';
