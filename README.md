@@ -1,11 +1,19 @@
 # Parlons !
 
-Application de pratique orale du français : 800 phrases courantes à écouter, répéter et
+Application de pratique orale du français : 1400 phrases courantes à écouter, répéter et
 enregistrer, avec un objectif de 20 phrases par jour et des succès à débloquer.
 
-Huit thèmes de 100 phrases : Vie quotidienne, Se faire des amis, Travail de vendeuse, Gérer une
-exposition d'art, Small talk au bureau, Entretien d'embauche, Exprimer ses émotions au
-quotidien, Convaincre & Négocier.
+Quatorze thèmes de 100 phrases, rangés en quatre familles sur l'accueil :
+
+| Famille | Thèmes |
+|---|---|
+| Au quotidien | Vie quotidienne, Se faire des amis, Exprimer ses émotions au quotidien |
+| Au travail | Small talk au bureau, Entretien d'embauche, Convaincre & Négocier, Travailler en start-up |
+| Métiers et secteurs | Travail de vendeuse, Gérer une exposition d'art, Le secteur de la finance – contrôle de gestion, Le secteur du luxe – retail |
+| Mieux s'exprimer | Les connecteurs logiques, Raconter une histoire, Les expressions françaises |
+
+Chaque famille affiche sa progression et se replie d'un appui sur son titre ; l'application
+retient les familles repliées.
 
 Chaque phrase est affichée avec sa traduction en anglais. Deux modes tirent les phrases au
 hasard dans tous les thèmes : le **mode rapide** (5 phrases) et le **mode illimité** (sans fin).
@@ -61,8 +69,8 @@ GitHub Pages peut mettre une dizaine de minutes à diffuser une nouvelle version
 **La progression n'est jamais touchée par une mise à jour** : elle est enregistrée à part, sur
 l'appareil. Deux règles pour qu'elle reste valable d'une version à l'autre :
 
-- ajouter les nouvelles phrases **à la fin** d'un thème, les nouveaux thèmes **à la fin** de la
-  liste, et ne jamais changer l'identifiant (`id`) d'un thème existant ;
+- ajouter les nouvelles phrases **à la fin** d'un thème, et ne jamais changer l'identifiant
+  (`id`) d'un thème existant ;
 - ne pas changer la clé `parlons.v1`.
 
 ## Rappel quotidien
@@ -163,6 +171,9 @@ position, en insérer au milieu décalerait la progression déjà enregistrée. 
 en toutes lettres dans la phrase française. Corriger une traduction ne change rien à la
 progression.
 
-Pour ajouter un thème, copier un bloc existant à la fin de la liste et lui donner un nouvel
-identifiant de deux lettres. Une fois le fichier publié, les étudiants reçoivent la nouvelle
-version automatiquement.
+Pour ajouter un thème, copier un bloc existant, lui donner un nouvel identifiant de deux
+lettres et indiquer sa famille avec `group` (`quotidien`, `travail`, `metiers` ou
+`expression`). Les familles sont définies juste au-dessus, dans `const GROUPS` : on peut en
+renommer une, en ajouter une, ou déplacer un thème en changeant son `group`, sans toucher à la
+progression. Une fois le fichier publié, les étudiants reçoivent la nouvelle version
+automatiquement.

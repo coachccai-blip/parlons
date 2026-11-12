@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Parlons ! — Pratique orale du français</title>
-<meta name="description" content="800 phrases du quotidien, de l'amitié, des émotions et du travail à écouter, répéter et enregistrer. Objectif : 20 phrases par jour.">
+<meta name="description" content="1400 phrases du quotidien, du travail et de plusieurs métiers à écouter, répéter et enregistrer. Objectif : 20 phrases par jour.">
 <meta name="theme-color" content="#FAF6EE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#13151F" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232F4BD8'/%3E%3Cpath d='M18 20h28a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6H32l-10 8v-8h-4a6 6 0 0 1-6-6V26a6 6 0 0 1 6-6z' fill='%23fff'/%3E%3C/svg%3E">
@@ -120,16 +120,25 @@ body.is-practice .shell { padding-bottom: 32px; }
 
 .section-title { display: flex; align-items: baseline; justify-content: space-between; margin: 28px 2px 12px; }
 .section-title h2 { font: 700 20px/1.2 var(--serif); }
-.cats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-.cat { display: block; padding: 16px; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
+.group + .group { margin-top: 10px; }
+.group summary { display: flex; align-items: center; gap: 10px; padding: 10px 4px; cursor: pointer; list-style: none; border-radius: 12px; -webkit-tap-highlight-color: transparent; }
+.group summary::-webkit-details-marker { display: none; }
+.g-name { flex: 1; min-width: 0; font-size: 17px; font-weight: 700; line-height: 1.25; }
+.g-count { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.g-count b { color: var(--ink); }
+.chev { flex: none; color: var(--faint); transition: transform .15s; }
+.group[open] .chev { transform: rotate(90deg); }
+.cats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding-bottom: 6px; }
+.cat { display: flex; align-items: flex-start; gap: 12px; padding: 14px; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
 .cat:hover { transform: translateY(-2px); border-color: var(--c); }
-.cat-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.cat-body { flex: 1; min-width: 0; }
+.cat-prog { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.cat-prog .bar { flex: 1; height: 8px; }
+.cat-prog b { color: var(--ink); }
 .cat-emoji { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 24px;
   background: color-mix(in srgb, var(--c) 16%, var(--surface)); flex: none; }
 .cat h3 { font-size: 16px; line-height: 1.25; }
-.cat p { font-size: 13px; color: var(--muted); min-height: 2.9em; }
-.cat-foot { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 8px; color: var(--muted); }
-.cat-foot b { color: var(--ink); }
+.cat p { font-size: 13px; line-height: 1.4; color: var(--muted); margin: 2px 0 9px; }
 .modes { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
 .mode { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; --c: var(--primary); transition: transform .15s, border-color .15s; }
 .mode:hover { transform: translateY(-2px); border-color: var(--c); }
@@ -266,12 +275,19 @@ body.is-practice .toasts { bottom: 20px; }
 'use strict';
 
 /* ───────────────────────── Phrases ─────────────────────────
-   8 thèmes × 100 phrases. Une phrase par ligne : la phrase en français, une barre « | », puis sa
+   14 thèmes × 100 phrases, rangés par familles (GROUPS). Une phrase par ligne : la phrase en français, une barre « | », puis sa
    traduction en anglais. Pour en ajouter, écrire une nouvelle ligne à la FIN du thème
    (l'identifiant d'une phrase est sa position dans le thème). Écrire les nombres en toutes lettres. */
 const lines = text => text.split('\n').map(s => s.trim()).filter(Boolean);
+/* Familles de thèmes, dans l'ordre de l'accueil. Chaque thème indique la sienne avec « group ». */
+const GROUPS = [
+  { id: 'quotidien', name: 'Au quotidien', emoji: '🏡' },
+  { id: 'travail', name: 'Au travail', emoji: '🏢' },
+  { id: 'metiers', name: 'Métiers et secteurs', emoji: '🧭' },
+  { id: 'expression', name: 'Mieux s\'exprimer', emoji: '✨' },
+];
 const CATS = [
-  { id: 'vq', name: 'Vie quotidienne', emoji: '🥐', color: '#E08A1E',
+  { id: 'vq', group: 'quotidien', name: 'Vie quotidienne', emoji: '🥐', color: '#E08A1E',
     desc: 'Saluer, demander son chemin, commander, se débrouiller.',
     phrases: lines(`
       Bonjour, comment allez-vous ? | Hello, how are you?
@@ -375,7 +391,7 @@ const CATS = [
       Je n'en ai aucune idée. | I have no idea.
       Quelle bonne nouvelle, félicitations ! | That's great news, congratulations!
     `) },
-  { id: 'am', name: 'Se faire des amis', emoji: '🤝', color: '#3E9B4F',
+  { id: 'am', group: 'quotidien', name: 'Se faire des amis', emoji: '🤝', color: '#3E9B4F',
     desc: 'Faire connaissance, complimenter, inviter, garder le contact.',
     phrases: lines(`
       Salut ! Comment tu t'appelles ? | Hi! What's your name?
@@ -479,7 +495,7 @@ const CATS = [
       Tu es vraiment quelqu'un en or. | You've got a heart of gold.
       À très vite, je t'embrasse ! | See you very soon, big hugs!
     `) },
-  { id: 'vd', name: 'Travail de vendeuse', emoji: '🛍️', color: '#D6457F',
+  { id: 'vd', group: 'metiers', name: 'Travail de vendeuse', emoji: '🛍️', color: '#D6457F',
     desc: 'Accueillir, conseiller et encaisser en magasin.',
     phrases: lines(`
       Bonjour, bienvenue ! | Hello, welcome!
@@ -583,7 +599,7 @@ const CATS = [
       Nous fermons exceptionnellement à dix-huit heures. | Today only, we're closing at six p.m.
       Merci, et très bonne fin de journée ! | Thank you, and enjoy the rest of your day!
     `) },
-  { id: 'ex', name: 'Gérer une exposition d\'art', emoji: '🎨', color: '#8A56D6',
+  { id: 'ex', group: 'metiers', name: 'Gérer une exposition d\'art', emoji: '🎨', color: '#8A56D6',
     desc: 'Accueillir le public, présenter les œuvres, organiser l\'accrochage.',
     phrases: lines(`
       Bienvenue à la galerie ! | Welcome to the gallery!
@@ -687,7 +703,7 @@ const CATS = [
       Le démontage est prévu lundi. | We take the show down on Monday.
       C'est un vrai succès, bravo à toute l'équipe ! | It's a real success, well done to the whole team!
     `) },
-  { id: 'bu', name: 'Small talk au bureau', emoji: '☕', color: '#1F9C96',
+  { id: 'bu', group: 'travail', name: 'Small talk au bureau', emoji: '☕', color: '#1F9C96',
     desc: 'Discuter avec les collègues, à la pause comme avant une réunion.',
     phrases: lines(`
       Salut, ça va ce matin ? | Hi, how's it going this morning?
@@ -791,7 +807,7 @@ const CATS = [
       À lundi, repose-toi bien ! | See you Monday, get some rest!
       Allez, bon courage pour la fin de la journée ! | Hang in there for the rest of the day!
     `) },
-  { id: 'en', name: 'Entretien d\'embauche', emoji: '💼', color: '#2F6FD8',
+  { id: 'en', group: 'travail', name: 'Entretien d\'embauche', emoji: '💼', color: '#2F6FD8',
     desc: 'Se présenter, convaincre, poser les bonnes questions.',
     phrases: lines(`
       Bonjour, merci de me recevoir. | Hello, thank you for seeing me.
@@ -895,7 +911,7 @@ const CATS = [
       Je vous souhaite une excellente fin de journée. | Have a great rest of your day.
       Au revoir, et encore merci pour votre temps. | Goodbye, and thank you again for your time.
     `) },
-  { id: 'em', name: 'Exprimer ses émotions au quotidien', emoji: '😊', color: '#E0533D',
+  { id: 'em', group: 'quotidien', name: 'Exprimer ses émotions au quotidien', emoji: '😊', color: '#E0533D',
     desc: 'Dire sa joie, ses peurs, sa colère, et réconforter les autres.',
     phrases: lines(`
       Je suis vraiment content de te voir. | I'm really happy to see you.
@@ -999,7 +1015,7 @@ const CATS = [
       Aujourd'hui, je me sens plein d'espoir. | Today, I feel full of hope.
       Parler de ce que je ressens me fait du bien. | Talking about how I feel does me good.
     `) },
-  { id: 'cn', name: 'Convaincre & Négocier', emoji: '⚖️', color: '#8C9A2B',
+  { id: 'cn', group: 'travail', name: 'Convaincre & Négocier', emoji: '⚖️', color: '#8C9A2B',
     desc: 'Argumenter, répondre aux objections, trouver un accord.',
     phrases: lines(`
       Je suis convaincu que c'est la meilleure solution. | I'm convinced this is the best solution.
@@ -1103,6 +1119,630 @@ const CATS = [
       Merci pour votre confiance. | Thank you for your trust.
       C'est un plaisir de faire affaire avec vous. | It's a pleasure doing business with you.
     `) },
+  { id: 'su', group: 'travail', name: 'Travailler en start-up', emoji: '🚀', color: '#7A5AF8',
+    desc: 'Présenter son projet, lancer un produit, avancer vite en petite équipe.',
+    phrases: lines(`
+      On a lancé la start-up il y a deux ans. | We launched the startup two years ago.
+      Nous sommes une équipe de douze personnes. | We're a team of twelve.
+      Je vous présente notre projet en deux minutes. | Let me pitch our project in two minutes.
+      Quel problème est-ce que vous résolvez ? | What problem are you solving?
+      Notre produit fait gagner du temps aux petites entreprises. | Our product saves small businesses time.
+      On vient de boucler une levée de fonds. | We've just closed a funding round.
+      Nous cherchons des investisseurs pour accélérer notre croissance. | We're looking for investors to speed up our growth.
+      Le marché est énorme et encore peu exploité. | The market is huge and still largely untapped.
+      On a déjà mille utilisateurs actifs. | We already have a thousand active users.
+      Notre chiffre d'affaires double tous les six mois. | Our revenue doubles every six months.
+      Qui sont vos concurrents ? | Who are your competitors?
+      Qu'est-ce qui vous différencie des autres ? | What sets you apart from the others?
+      On teste d'abord l'idée avec un prototype. | We're testing the idea with a prototype first.
+      Il faut sortir une première version rapidement. | We need to get a first version out quickly.
+      On améliore le produit chaque semaine. | We improve the product every week.
+      Les retours des utilisateurs sont très positifs. | The user feedback is very positive.
+      Les clients demandent cette fonctionnalité depuis longtemps. | Customers have been asking for this feature for a long time.
+      On a décidé de changer de stratégie. | We've decided to change our strategy.
+      Ce n'est pas la priorité pour l'instant. | That's not the priority right now.
+      Concentrons-nous sur l'essentiel. | Let's focus on what matters most.
+      Quel est l'objectif de ce trimestre ? | What's the goal for this quarter?
+      On fait un point d'équipe tous les matins. | We have a team stand-up every morning.
+      Qu'est-ce que tu as fait hier ? | What did you do yesterday?
+      Sur quoi tu travailles aujourd'hui ? | What are you working on today?
+      Est-ce que quelque chose te bloque ? | Is anything blocking you?
+      Je m'en occupe tout de suite. | I'm on it.
+      On livre la nouvelle version vendredi. | We're shipping the new version on Friday.
+      Il y a un bug sur la page de paiement. | There's a bug on the payment page.
+      Le site est tombé en panne cette nuit. | The site went down last night.
+      C'est corrigé, tout fonctionne à nouveau. | It's fixed, everything's working again.
+      Ici, tout le monde fait un peu de tout. | Everyone here wears many hats.
+      On avance vite et on apprend de nos erreurs. | We move fast and learn from our mistakes.
+      On n'a pas beaucoup de moyens, mais on a des idées. | We don't have much money, but we have ideas.
+      Il faut tester avant d'investir davantage. | We need to test before investing any more.
+      Les chiffres montrent que ça marche. | The numbers show that it's working.
+      On suit nos indicateurs de près. | We keep a close eye on our metrics.
+      Combien coûte l'acquisition d'un nouveau client ? | How much does it cost to acquire a new customer?
+      Trop de clients partent après le premier mois. | Too many customers leave after the first month.
+      Il faut fidéliser nos utilisateurs. | We need to retain our users.
+      Notre modèle repose sur l'abonnement. | Our model is subscription-based.
+      La version de base est gratuite. | The basic version is free.
+      On propose un essai gratuit de trente jours. | We offer a thirty-day free trial.
+      Nous devons atteindre la rentabilité l'année prochaine. | We need to become profitable next year.
+      Il nous reste huit mois de trésorerie. | We have eight months of runway left.
+      On recrute un développeur et une commerciale. | We're hiring a developer and a sales rep.
+      Tu connais quelqu'un qui pourrait rejoindre l'équipe ? | Do you know anyone who might want to join the team?
+      On cherche des profils polyvalents. | We're looking for versatile people.
+      Le salaire est modeste, mais tu auras des parts de l'entreprise. | The salary is modest, but you'll get equity in the company.
+      L'ambiance est détendue, mais on travaille dur. | The atmosphere is relaxed, but we work hard.
+      Chacun est responsable de ses projets. | Everyone owns their own projects.
+      Je travaille à distance trois jours par semaine. | I work remotely three days a week.
+      On se retrouve au bureau le mardi. | We all come into the office on Tuesdays.
+      On partage nos locaux avec d'autres start-up. | We share our office space with other startups.
+      Tu peux partager ton écran ? | Can you share your screen?
+      Je t'envoie le lien de la réunion. | I'll send you the meeting link.
+      Tu es en sourdine, on ne t'entend pas. | You're on mute, we can't hear you.
+      On fait le bilan à la fin de chaque projet. | We do a review at the end of every project.
+      Qu'est-ce qui a bien marché ? | What went well?
+      Qu'est-ce qu'on peut améliorer ? | What can we improve?
+      J'ai une idée, dites-moi ce que vous en pensez. | I have an idea, tell me what you think.
+      Bonne idée, on essaie ! | Good idea, let's try it!
+      Ça ne marchera pas à grande échelle. | That won't work at scale.
+      Il faut automatiser cette tâche. | We need to automate this task.
+      On perd trop de temps en réunion. | We waste too much time in meetings.
+      Je préfère qu'on en parle de vive voix. | I'd rather we talk about it in person.
+      Tu peux me faire un retour sur ma présentation ? | Can you give me feedback on my presentation?
+      Sois direct, je préfère la franchise. | Be straight with me, I prefer honesty.
+      On a signé notre premier gros client ! | We've signed our first big client!
+      On fête ça ce soir ! | We're celebrating tonight!
+      Le lancement est prévu le mois prochain. | The launch is scheduled for next month.
+      On prépare une campagne sur les réseaux sociaux. | We're preparing a social media campaign.
+      Il faut soigner l'expérience utilisateur. | We need to nail the user experience.
+      L'application doit être simple et intuitive. | The app has to be simple and intuitive.
+      On a interrogé une vingtaine de clients. | We interviewed about twenty customers.
+      Ils veulent surtout une solution fiable. | Above all, they want a reliable solution.
+      On s'est trompés de cible au départ. | We went after the wrong target at first.
+      On a pivoté vers les entreprises. | We pivoted toward businesses.
+      Les investisseurs veulent voir de la croissance. | Investors want to see growth.
+      Combien voulez-vous lever ? | How much do you want to raise?
+      Nous voulons lever deux millions d'euros. | We want to raise two million euros.
+      À quoi servira cet argent ? | What will the money be used for?
+      Nous allons recruter et nous développer à l'étranger. | We're going to hire and expand abroad.
+      Quelle est la valorisation de l'entreprise ? | What's the company's valuation?
+      J'ai rendez-vous avec un fonds d'investissement demain. | I have a meeting with an investment fund tomorrow.
+      Mon associé s'occupe de la partie technique. | My co-founder handles the technical side.
+      Moi, je gère les ventes et les partenariats. | I handle sales and partnerships.
+      On se complète bien. | We complement each other well.
+      Créer une entreprise, c'est des hauts et des bas. | Starting a company is full of ups and downs.
+      Certains mois sont vraiment difficiles. | Some months are really tough.
+      Il faut savoir dire non. | You have to know how to say no.
+      On ne peut pas tout faire en même temps. | We can't do everything at once.
+      On a pris du retard sur le planning. | We've fallen behind schedule.
+      On repousse la sortie d'une semaine. | We're pushing the release back a week.
+      Mieux vaut un produit simple qui fonctionne. | Better a simple product that works.
+      Je suis fier de ce qu'on a construit ensemble. | I'm proud of what we've built together.
+      Notre mission, c'est de simplifier la vie des gens. | Our mission is to make people's lives easier.
+      On veut devenir le leader européen du secteur. | We want to become the European leader in our field.
+      Dans une start-up, chaque journée est différente. | At a startup, no two days are the same.
+      On grandit vite, il faut s'organiser. | We're growing fast, we need to get organized.
+      Merci à toute l'équipe, on a fait un travail incroyable ! | Thanks to the whole team, we did an incredible job!
+    `) },
+  { id: 'fi', group: 'metiers', name: 'Le secteur de la finance – contrôle de gestion', emoji: '📊', color: '#2E8B6A',
+    desc: 'Budgets, écarts, clôtures et tableaux de bord.',
+    phrases: lines(`
+      Je travaille au contrôle de gestion. | I work in financial controlling.
+      Je suis contrôleuse de gestion dans un grand groupe. | I'm a financial controller at a large corporation.
+      Mon rôle, c'est d'aider la direction à prendre les bonnes décisions. | My job is to help management make the right decisions.
+      Je prépare le budget de l'année prochaine. | I'm preparing next year's budget.
+      Le budget doit être validé avant la fin du mois. | The budget has to be approved by the end of the month.
+      Nous sommes en pleine clôture mensuelle. | We're in the middle of month-end closing.
+      La clôture annuelle approche. | Year-end closing is coming up.
+      Je dois envoyer le reporting avant midi. | I have to send out the report before noon.
+      Voici le tableau de bord du mois. | Here's this month's dashboard.
+      Les chiffres sont meilleurs que prévu. | The numbers are better than expected.
+      Le chiffre d'affaires a augmenté de huit pour cent. | Revenue is up eight percent.
+      Les ventes sont en baisse par rapport à l'année dernière. | Sales are down compared with last year.
+      La marge s'est améliorée ce trimestre. | The margin improved this quarter.
+      Les coûts ont dépassé le budget. | Costs came in over budget.
+      Il faut expliquer cet écart. | We need to explain this variance.
+      D'où vient cet écart ? | Where does this variance come from?
+      L'écart s'explique par la hausse des prix des matières premières. | The variance is due to higher raw material prices.
+      Nous sommes en ligne avec le budget. | We're on budget.
+      Nous sommes en retard sur nos objectifs. | We're behind on our targets.
+      Il faut réviser les prévisions à la baisse. | We need to revise the forecast downward.
+      Je mets à jour les prévisions chaque mois. | I update the forecast every month.
+      Quelles sont les hypothèses de ce scénario ? | What are the assumptions behind this scenario?
+      J'ai préparé trois scénarios différents. | I've prepared three different scenarios.
+      Dans le pire des cas, nous perdons de l'argent. | In the worst case, we lose money.
+      Ce projet sera rentable dans deux ans. | This project will be profitable in two years.
+      Quel est le retour sur investissement ? | What's the return on investment?
+      Quel est le seuil de rentabilité ? | What's the break-even point?
+      Nous devons réduire les coûts fixes. | We need to cut fixed costs.
+      Les charges de personnel représentent la moitié des dépenses. | Payroll costs account for half of our expenses.
+      Où peut-on faire des économies ? | Where can we save money?
+      Cette dépense n'était pas prévue au budget. | This expense wasn't budgeted.
+      Qui a validé cette dépense ? | Who approved this expense?
+      Il me manque une facture. | I'm missing an invoice.
+      Pouvez-vous m'envoyer le détail des coûts ? | Could you send me the cost breakdown?
+      J'ai besoin des chiffres avant ce soir. | I need the figures by tonight.
+      Les données ne sont pas encore disponibles. | The data isn't available yet.
+      Je dois vérifier ces chiffres. | I need to double-check these figures.
+      Il y a une erreur dans le tableau. | There's a mistake in the spreadsheet.
+      La formule ne fonctionne pas. | The formula isn't working.
+      J'ai automatisé ce rapport. | I've automated this report.
+      Les données sont extraites du système chaque matin. | The data is pulled from the system every morning.
+      Je vous présente les résultats du trimestre. | Let me walk you through the quarterly results.
+      En résumé, l'activité se porte bien. | In short, the business is doing well.
+      Le résultat net est positif. | Net income is positive.
+      La trésorerie est tendue en ce moment. | Cash is tight right now.
+      Nos clients paient en retard. | Our customers are paying late.
+      Il faut relancer les clients qui n'ont pas payé. | We need to chase the customers who haven't paid.
+      Les stocks sont trop élevés. | Inventory levels are too high.
+      Nous avons investi dans de nouvelles machines. | We've invested in new machinery.
+      Cet investissement sera amorti sur cinq ans. | This investment will be depreciated over five years.
+      Je travaille en étroite collaboration avec la comptabilité. | I work closely with the accounting team.
+      Les opérationnels ont besoin de chiffres clairs. | The operational teams need clear numbers.
+      Mon travail, c'est de faire parler les chiffres. | My job is to make the numbers tell a story.
+      Je traduis la stratégie en objectifs chiffrés. | I turn strategy into measurable targets.
+      Quels indicateurs suivez-vous ? | Which metrics do you track?
+      Nous suivons la marge, les coûts et la trésorerie. | We track margin, costs and cash.
+      Cet indicateur est dans le rouge. | This indicator is in the red.
+      La tendance est encourageante. | The trend is encouraging.
+      Il faut rester prudent. | We need to stay cautious.
+      Je recommande de reporter cet investissement. | I recommend postponing this investment.
+      Ce produit n'est pas assez rentable. | This product isn't profitable enough.
+      Ce client nous coûte plus qu'il ne rapporte. | This customer costs us more than they bring in.
+      Il faut revoir nos prix. | We need to review our pricing.
+      Une hausse des prix de trois pour cent suffirait. | A three percent price increase would be enough.
+      Quel est l'impact sur la marge ? | What's the impact on the margin?
+      J'ai calculé le coût de revient de chaque produit. | I've worked out the full cost of each product.
+      Les frais généraux sont répartis entre les services. | Overheads are allocated across departments.
+      Chaque service a son propre budget. | Each department has its own budget.
+      Votre service a dépassé son budget de dix pour cent. | Your department is ten percent over budget.
+      Pouvez-vous justifier ce dépassement ? | Can you justify the overrun?
+      Nous avons recruté plus que prévu. | We hired more people than planned.
+      Je comprends, mais il faut compenser ailleurs. | I understand, but we'll have to make up for it elsewhere.
+      La direction veut un plan d'économies. | Management wants a cost-saving plan.
+      Le comité de direction se réunit jeudi. | The executive committee meets on Thursday.
+      Je présente le budget au directeur financier demain. | I'm presenting the budget to the CFO tomorrow.
+      Le directeur financier attend mon analyse. | The CFO is waiting for my analysis.
+      Les auditeurs arrivent la semaine prochaine. | The auditors are coming next week.
+      Tous les comptes doivent être justifiés. | Every account has to be substantiated.
+      Il faut passer une provision pour ce risque. | We need to book a provision for this risk.
+      Les comptes sont clôturés. | The books are closed.
+      Nous consolidons les résultats de toutes les filiales. | We consolidate the results of all the subsidiaries.
+      La filiale espagnole a de très bons résultats. | The Spanish subsidiary is posting very good results.
+      Le taux de change a pesé sur nos résultats. | The exchange rate weighed on our results.
+      L'inflation fait augmenter nos coûts. | Inflation is driving up our costs.
+      Nous devons anticiper les risques. | We need to anticipate the risks.
+      Je compare le réel au budget. | I compare actuals against budget.
+      Le réel est inférieur aux prévisions. | Actuals are below forecast.
+      Nous terminons l'année au-dessus de l'objectif. | We're finishing the year above target.
+      Les résultats seront publiés en mars. | The results will be published in March.
+      Je maîtrise très bien les tableurs. | I'm very good with spreadsheets.
+      Un bon graphique vaut mieux qu'un long tableau. | A good chart is worth more than a long table.
+      Les chiffres ne disent pas tout. | Numbers don't tell the whole story.
+      Il faut aller sur le terrain pour comprendre. | You have to go out into the field to understand.
+      Pouvez-vous m'expliquer comment fonctionne votre activité ? | Could you explain how your business works?
+      Je suis là pour vous aider, pas pour vous contrôler. | I'm here to help you, not to police you.
+      Ce rapport est confidentiel. | This report is confidential.
+      La rigueur est essentielle dans ce métier. | Attention to detail is essential in this job.
+      Une petite erreur peut avoir de grandes conséquences. | A small mistake can have big consequences.
+      Nous avons tenu nos engagements cette année. | We delivered on our commitments this year.
+      Les objectifs de l'année sont atteints, bravo à tous ! | We've hit our targets for the year, well done everyone!
+    `) },
+  { id: 'lx', group: 'metiers', name: 'Le secteur du luxe – retail', emoji: '💎', color: '#B8892B',
+    desc: 'Recevoir une clientèle exigeante et raconter le savoir-faire.',
+    phrases: lines(`
+      Bonjour madame, soyez la bienvenue. | Good morning, madam, and welcome.
+      Puis-je vous offrir un café ou une coupe de champagne ? | May I offer you a coffee or a glass of champagne?
+      Je vous en prie, installez-vous. | Please, have a seat.
+      Je m'appelle Claire, je serai votre conseillère aujourd'hui. | My name is Claire, and I'll be looking after you today.
+      Que puis-je faire pour vous aujourd'hui ? | How may I help you today?
+      Est-ce votre première visite chez nous ? | Is this your first visit with us?
+      Quel plaisir de vous revoir, monsieur ! | What a pleasure to see you again, sir!
+      Recherchez-vous une pièce en particulier ? | Are you looking for a particular piece?
+      Est-ce pour vous ou pour offrir ? | Is it for yourself, or is it a gift?
+      Permettez-moi de vous présenter notre nouvelle collection. | Allow me to show you our new collection.
+      Cette pièce vient tout juste d'arriver. | This piece has only just arrived.
+      C'est l'un de nos modèles emblématiques. | It's one of our iconic designs.
+      Notre maison a été fondée il y a plus de cent ans. | Our house was founded more than a hundred years ago.
+      Chaque pièce est fabriquée à la main dans nos ateliers. | Each piece is handmade in our workshops.
+      Il faut plus de vingt heures de travail pour réaliser ce sac. | It takes more than twenty hours of work to make this bag.
+      Nos artisans perpétuent un savoir-faire unique. | Our artisans carry on a unique craft.
+      Le cuir est d'une qualité exceptionnelle. | The leather is of exceptional quality.
+      Touchez, la matière est incroyablement douce. | Feel it, the material is incredibly soft.
+      Les finitions sont entièrement cousues à la main. | The finishing is entirely hand-stitched.
+      C'est une édition limitée. | It's a limited edition.
+      Il n'en existe que cinquante exemplaires dans le monde. | There are only fifty of them in the world.
+      Souhaitez-vous l'essayer ? | Would you like to try it on?
+      Je vous accompagne jusqu'au salon privé. | Let me show you to the private lounge.
+      Prenez tout votre temps. | Please take all the time you need.
+      Ce modèle vous va à ravir. | This style looks wonderful on you.
+      Cette couleur met votre teint en valeur. | This color really flatters your complexion.
+      Il existe aussi en noir et en bleu nuit. | It also comes in black and midnight blue.
+      Puis-je vous suggérer ce foulard pour l'accompagner ? | May I suggest this scarf to go with it?
+      Ces deux pièces se marient parfaitement. | These two pieces go together beautifully.
+      C'est un choix très élégant. | That's a very elegant choice.
+      C'est une pièce intemporelle. | It's a timeless piece.
+      Vous la garderez toute votre vie. | You'll keep it for a lifetime.
+      Nous pouvons graver vos initiales. | We can engrave your initials.
+      La personnalisation est offerte. | Personalization is complimentary.
+      Nous proposons également un service sur mesure. | We also offer a made-to-measure service.
+      Notre tailleur peut prendre vos mesures aujourd'hui. | Our tailor can take your measurements today.
+      Les retouches seront prêtes sous une semaine. | The alterations will be ready within a week.
+      Ce modèle n'est malheureusement plus disponible. | Unfortunately, this style is no longer available.
+      Je peux vous inscrire sur la liste d'attente. | I can add you to the waiting list.
+      Je vous préviens personnellement dès qu'il arrive. | I'll let you know personally as soon as it arrives.
+      Je vérifie sa disponibilité dans nos autres boutiques. | I'll check whether it's available in our other boutiques.
+      Nous pouvons le faire venir de Paris en deux jours. | We can have it sent from Paris in two days.
+      Souhaitez-vous que je vous le réserve ? | Would you like me to reserve it for you?
+      Puis-je vous demander votre nom ? | May I ask your name?
+      Avez-vous déjà un compte client chez nous ? | Do you already have a client account with us?
+      Comment souhaitez-vous régler ? | How would you like to pay?
+      Je vous prépare un paquet cadeau. | I'll gift-wrap it for you.
+      Souhaitez-vous ajouter un mot personnalisé ? | Would you like to add a personal note?
+      Nous pouvons livrer la pièce à votre hôtel. | We can deliver the piece to your hotel.
+      La livraison est offerte, bien entendu. | Delivery is complimentary, of course.
+      Voici votre certificat d'authenticité. | Here is your certificate of authenticity.
+      La montre est garantie cinq ans. | The watch comes with a five-year warranty.
+      Je vous explique comment entretenir le cuir. | Let me explain how to care for the leather.
+      Évitez le contact avec l'eau et le parfum. | Avoid contact with water and perfume.
+      Rangez-le dans sa housse de protection. | Store it in its dust bag.
+      Nous proposons un service d'entretien à vie. | We offer a lifetime care service.
+      Vous pouvez nous confier votre pièce pour une réparation. | You can leave your piece with us for repair.
+      Nos ateliers s'occuperont de la remettre en état. | Our workshops will restore it for you.
+      La réparation prendra environ trois semaines. | The repair will take about three weeks.
+      Vous résidez hors de l'Union européenne ? | Do you live outside the European Union?
+      Vous pouvez bénéficier de la détaxe. | You're eligible for a tax refund.
+      J'aurai besoin de votre passeport, s'il vous plaît. | I'll need your passport, please.
+      Je vous raccompagne jusqu'à la porte. | Let me see you to the door.
+      Ce fut un plaisir de vous accueillir. | It was a pleasure having you with us.
+      Voici ma carte, n'hésitez pas à me contacter directement. | Here's my card, please feel free to contact me directly.
+      Je me permettrai de vous appeler pour prendre de vos nouvelles. | I'll give you a call to see how you're getting on.
+      Nous organisons une soirée privée pour nos meilleurs clients. | We're hosting a private evening for our best clients.
+      Vous êtes cordialement invitée à découvrir la collection en avant-première. | You're cordially invited to a preview of the collection.
+      Souhaitez-vous prendre rendez-vous pour un essayage privé ? | Would you like to book a private fitting?
+      Je vous ai mis de côté quelques pièces qui pourraient vous plaire. | I've set aside a few pieces I think you'll like.
+      Je me souviens que vous aimez les couleurs sobres. | I remember you like understated colors.
+      Comment se porte la montre que vous avez achetée l'an dernier ? | How are you enjoying the watch you bought last year?
+      Joyeux anniversaire, madame, de la part de toute la maison. | Happy birthday, madam, from everyone at the house.
+      Chaque client doit se sentir unique. | Every client should feel special.
+      Dans le luxe, chaque détail compte. | In luxury, every detail matters.
+      On ne vend pas un produit, on fait vivre une expérience. | We don't sell a product, we create an experience.
+      Il faut écouter avant de proposer. | You have to listen before you suggest anything.
+      Je ne force jamais la vente. | I never push for a sale.
+      La discrétion est essentielle avec notre clientèle. | Discretion is essential with our clientele.
+      La boutique doit être impeccable à l'ouverture. | The boutique must be spotless when we open.
+      Les vitrines changent toutes les six semaines. | The window displays change every six weeks.
+      Il faut porter des gants pour manipuler les bijoux. | You have to wear gloves to handle the jewelry.
+      Je vous présente la pièce sur un plateau. | Let me present the piece to you on a tray.
+      Cette bague est en or blanc sertie de diamants. | This ring is white gold set with diamonds.
+      Ce parfum a des notes de jasmin et de bois de santal. | This fragrance has notes of jasmine and sandalwood.
+      La soie vient de Lyon. | The silk comes from Lyon.
+      Ce cachemire est d'une finesse remarquable. | This cashmere is remarkably fine.
+      Le prix reflète la rareté des matières. | The price reflects the rarity of the materials.
+      Je comprends que ce soit un achat important. | I understand it's a significant purchase.
+      Souhaitez-vous y réfléchir tranquillement ? | Would you like some time to think it over?
+      Nous ne pratiquons pas de remises, madame. | I'm afraid we don't offer discounts, madam.
+      La valeur de cette pièce augmente avec le temps. | This piece gains value over time.
+      Nos clients viennent du monde entier. | Our clients come from all over the world.
+      Je parle anglais, français et un peu de chinois. | I speak English, French and a little Chinese.
+      Je vous prie de m'excuser pour l'attente. | I do apologize for the wait.
+      Je suis navrée, je vais arranger cela immédiatement. | I'm so sorry, I'll sort that out right away.
+      Nous ferons tout notre possible pour vous satisfaire. | We'll do our utmost to make sure you're satisfied.
+      Notre objectif, c'est que vous repartiez enchantée. | Our goal is for you to leave delighted.
+      Merci pour votre fidélité. | Thank you for your loyalty.
+      Au plaisir de vous revoir très bientôt, madame. | We look forward to seeing you again very soon, madam.
+    `) },
+  { id: 'cl', group: 'expression', name: 'Les connecteurs logiques', emoji: '🔗', color: '#3F8FD6',
+    desc: 'Relier ses idées : cause, conséquence, opposition, conclusion.',
+    phrases: lines(`
+      D'abord, je me présente. | First, let me introduce myself.
+      Ensuite, nous parlerons du projet. | Then we'll talk about the project.
+      Puis nous ferons une courte pause. | After that, we'll take a short break.
+      Enfin, je répondrai à vos questions. | Finally, I'll answer your questions.
+      Pour commencer, merci à tous d'être venus. | To start with, thank you all for coming.
+      Premièrement, c'est trop cher. Deuxièmement, c'est trop loin. | First, it's too expensive. Second, it's too far.
+      Je suis fatigué, donc je rentre. | I'm tired, so I'm going home.
+      Il pleuvait, alors nous sommes restés à la maison. | It was raining, so we stayed home.
+      Il a beaucoup travaillé, c'est pourquoi il a réussi. | He worked hard, which is why he succeeded.
+      Le train était en retard, par conséquent j'ai raté ma réunion. | The train was late, and as a result I missed my meeting.
+      Elle parle trois langues, du coup elle voyage facilement. | She speaks three languages, so traveling is easy for her.
+      Je reste à la maison parce que je suis malade. | I'm staying home because I'm sick.
+      Je ne sors pas, car il fait trop froid. | I'm not going out, since it's too cold.
+      Puisque tu es là, aide-moi. | Since you're here, give me a hand.
+      Comme il pleuvait, j'ai pris un taxi. | As it was raining, I took a taxi.
+      Étant donné que le magasin est fermé, nous reviendrons demain. | Given that the store is closed, we'll come back tomorrow.
+      J'ai réussi grâce à ton aide. | I succeeded thanks to your help.
+      Nous sommes en retard à cause des embouteillages. | We're late because of the traffic.
+      Vu que tu connais le chemin, passe devant. | Seeing as you know the way, you go first.
+      J'aime le café, mais je préfère le thé. | I like coffee, but I prefer tea.
+      Il est riche, pourtant il n'est pas heureux. | He's rich, and yet he isn't happy.
+      C'est une bonne idée, cependant elle coûte cher. | It's a good idea; however, it's expensive.
+      Le film est long, néanmoins il est passionnant. | The film is long; nevertheless, it's gripping.
+      Je n'aime pas le sport, en revanche j'adore la danse. | I don't like sports; on the other hand, I love dancing.
+      Lui, il est calme, par contre sa sœur est très bavarde. | He's quiet, but his sister is a real chatterbox.
+      Elle est sortie malgré la pluie. | She went out despite the rain.
+      Bien qu'il soit tard, je continue à travailler. | Even though it's late, I'm still working.
+      Même s'il pleut, nous irons à la plage. | Even if it rains, we'll go to the beach.
+      Il travaille alors que tout le monde dort. | He's working while everyone else is asleep.
+      J'adore la ville, tandis que mon mari préfère la campagne. | I love the city, whereas my husband prefers the countryside.
+      Tu devrais te reposer au lieu de travailler. | You should rest instead of working.
+      Il n'est pas paresseux, au contraire, il travaille beaucoup. | He's not lazy; on the contrary, he works a lot.
+      Certes, c'est difficile, mais ce n'est pas impossible. | Granted, it's hard, but it's not impossible.
+      J'ai accepté, toutefois j'ai posé mes conditions. | I accepted, though I did set my conditions.
+      Il a quand même réussi son examen. | He passed his exam all the same.
+      Je suis fatiguée, mais je viens quand même. | I'm tired, but I'm coming anyway.
+      J'étudie le français pour trouver un travail. | I'm studying French to find a job.
+      Je parle lentement pour que tu comprennes. | I'm speaking slowly so that you understand.
+      Il se lève tôt afin d'éviter les embouteillages. | He gets up early in order to avoid the traffic.
+      Je t'écris afin que tu sois au courant. | I'm writing to keep you in the loop.
+      Parle plus fort, de façon à ce que tout le monde entende. | Speak up so that everyone can hear.
+      Si tu veux, on peut y aller ensemble. | If you like, we can go together.
+      Je viendrai à condition que tu m'invites. | I'll come, provided you invite me.
+      Prends un parapluie au cas où il pleuvrait. | Take an umbrella in case it rains.
+      Dépêche-toi, sinon nous allons rater le train. | Hurry up, otherwise we'll miss the train.
+      Je sortirai à moins qu'il ne pleuve. | I'll go out unless it rains.
+      Pourvu qu'il fasse beau demain ! | Let's hope the weather's nice tomorrow!
+      Tu peux venir, du moment que tu préviens. | You can come, as long as you let us know.
+      Il est gentil, et en plus il est drôle. | He's kind, and he's funny too.
+      Ce restaurant est bon, de plus il n'est pas cher. | This restaurant is good; what's more, it isn't expensive.
+      Il fait froid, en outre il commence à neiger. | It's cold; moreover, it's starting to snow.
+      Elle chante bien, et elle danse également. | She sings well, and she dances as well.
+      Non seulement il parle français, mais aussi espagnol. | Not only does he speak French, but Spanish too.
+      Je n'aime ni le thé ni le café. | I like neither tea nor coffee.
+      On peut soit prendre le train, soit y aller en voiture. | We can either take the train or drive.
+      D'une part c'est pratique, d'autre part c'est économique. | On the one hand it's convenient, and on the other it's economical.
+      Par ailleurs, je voudrais vous parler d'autre chose. | On another note, I'd like to talk to you about something else.
+      D'ailleurs, je te l'avais dit. | Besides, I told you so.
+      J'aime les fruits, par exemple les pommes et les poires. | I like fruit, for example apples and pears.
+      Il aime les sports d'hiver, notamment le ski. | He likes winter sports, particularly skiing.
+      J'aime tous les légumes, surtout les tomates. | I like all vegetables, especially tomatoes.
+      Il est polyglotte, c'est-à-dire qu'il parle plusieurs langues. | He's a polyglot, meaning he speaks several languages.
+      Autrement dit, tu ne viens pas. | In other words, you're not coming.
+      En d'autres termes, il faut recommencer. | Put differently, we have to start over.
+      En fait, je ne suis pas d'accord. | Actually, I don't agree.
+      En réalité, c'est plus compliqué que ça. | In reality, it's more complicated than that.
+      En effet, vous avez raison. | Indeed, you're right.
+      À vrai dire, je n'en sais rien. | To tell the truth, I have no idea.
+      Franchement, je trouve ça dommage. | Frankly, I think it's a shame.
+      Quant à moi, je préfère rester ici. | As for me, I'd rather stay here.
+      En ce qui concerne le prix, nous pouvons en discuter. | As far as the price is concerned, we can discuss it.
+      À propos, tu as des nouvelles de Paul ? | Speaking of which, have you heard from Paul?
+      Au fait, à quelle heure commence le film ? | By the way, what time does the movie start?
+      Quand il fait beau, je vais au travail à pied. | When the weather's nice, I walk to work.
+      Lorsque je suis arrivé, tout le monde était déjà parti. | When I arrived, everyone had already left.
+      Dès que j'arrive, je t'appelle. | As soon as I get there, I'll call you.
+      Pendant que tu cuisines, je mets la table. | While you cook, I'll set the table.
+      Je l'attends depuis qu'il est parti. | I've been waiting for him ever since he left.
+      Lave-toi les mains avant de manger. | Wash your hands before you eat.
+      Après avoir mangé, nous sommes allés nous promener. | After eating, we went for a walk.
+      Reste ici jusqu'à ce que je revienne. | Stay here until I get back.
+      Tant qu'il y a de la vie, il y a de l'espoir. | Where there's life, there's hope.
+      Une fois que tu auras fini, préviens-moi. | Once you've finished, let me know.
+      Au moment où je sortais, le téléphone a sonné. | Just as I was leaving, the phone rang.
+      Plus je pratique, plus je progresse. | The more I practice, the more I improve.
+      Il parle français comme un Français. | He speaks French like a native.
+      Elle est aussi grande que son frère. | She's as tall as her brother.
+      De même, je vous souhaite une bonne année. | Likewise, I wish you a happy New Year.
+      Il a agi comme si de rien n'était. | He acted as if nothing had happened.
+      De toute façon, il est trop tard. | In any case, it's too late.
+      En tout cas, merci d'être venu. | Anyway, thanks for coming.
+      Quoi qu'il en soit, la décision est prise. | Be that as it may, the decision has been made.
+      Cela dit, je comprends ton point de vue. | That said, I understand your point of view.
+      Malgré tout, je garde le sourire. | In spite of everything, I keep smiling.
+      Finalement, nous avons choisi l'autre appartement. | In the end, we chose the other apartment.
+      Bref, tout s'est bien terminé. | Long story short, it all ended well.
+      En résumé, le projet avance bien. | To sum up, the project is going well.
+      Dans l'ensemble, je suis satisfait. | Overall, I'm satisfied.
+      En conclusion, je vous remercie de votre attention. | In conclusion, thank you for your attention.
+      Pour finir, je voudrais remercier toute l'équipe. | To finish, I'd like to thank the whole team.
+    `) },
+  { id: 'hi', group: 'expression', name: 'Raconter une histoire', emoji: '📖', color: '#A9623A',
+    desc: 'Planter le décor, enchaîner les événements, ménager le suspense.',
+    phrases: lines(`
+      Il était une fois une petite fille qui vivait près d'une forêt. | Once upon a time, there was a little girl who lived near a forest.
+      Je vais te raconter ce qui m'est arrivé hier. | Let me tell you what happened to me yesterday.
+      Tu ne devineras jamais ce qui s'est passé ! | You'll never guess what happened!
+      Figure-toi que j'ai croisé mon ancien professeur. | Would you believe I ran into my old teacher?
+      Il faut que je te raconte quelque chose d'incroyable. | I have to tell you something incredible.
+      C'est une longue histoire. | It's a long story.
+      Ça s'est passé il y a trois ans. | It happened three years ago.
+      C'était un soir d'hiver. | It was a winter evening.
+      À l'époque, j'habitais à Marseille. | At the time, I was living in Marseille.
+      J'avais vingt ans et je venais d'arriver en France. | I was twenty and had just arrived in France.
+      Il faisait nuit et il pleuvait très fort. | It was dark and pouring rain.
+      Il n'y avait personne dans la rue. | There was no one in the street.
+      J'étais en train de dîner quand le téléphone a sonné. | I was having dinner when the phone rang.
+      Au début, tout se passait bien. | At first, everything was going fine.
+      Tout a commencé par un simple message. | It all started with a simple message.
+      Ce jour-là, je me suis levé très tôt. | That day, I got up very early.
+      Comme d'habitude, j'ai pris le métro. | As usual, I took the metro.
+      Je ne me doutais de rien. | I had no idea what was coming.
+      Tout à coup, j'ai entendu un grand bruit. | All of a sudden, I heard a loud noise.
+      Soudain, la lumière s'est éteinte. | Suddenly, the lights went out.
+      À ce moment-là, quelqu'un a frappé à la porte. | Just then, someone knocked on the door.
+      Et là, devine qui est entré ! | And then, guess who walked in!
+      Je me suis retourné et j'ai vu mon frère. | I turned around and saw my brother.
+      Je n'en croyais pas mes yeux. | I couldn't believe my eyes.
+      J'ai eu très peur. | I was really scared.
+      Mon cœur battait très fort. | My heart was pounding.
+      Je ne savais pas quoi faire. | I didn't know what to do.
+      Alors, j'ai décidé de l'appeler. | So I decided to call him.
+      Sans réfléchir, je suis sorti en courant. | Without thinking, I ran outside.
+      Ensuite, nous sommes allés au commissariat. | Then we went to the police station.
+      Quelques minutes plus tard, la police est arrivée. | A few minutes later, the police arrived.
+      Pendant ce temps, mon ami m'attendait dehors. | Meanwhile, my friend was waiting for me outside.
+      Une heure après, nous étions toujours là. | An hour later, we were still there.
+      Le lendemain, j'ai tout raconté à ma mère. | The next day, I told my mother everything.
+      La veille, j'avais oublié de fermer la fenêtre. | The day before, I had forgotten to close the window.
+      Trois jours plus tard, j'ai reçu une lettre. | Three days later, I got a letter.
+      Peu à peu, la situation s'est améliorée. | Little by little, things got better.
+      Au bout d'un moment, il a fini par accepter. | After a while, he finally agreed.
+      Entre-temps, j'avais changé d'avis. | In the meantime, I had changed my mind.
+      C'est alors que j'ai compris mon erreur. | That's when I realized my mistake.
+      En réalité, il n'avait jamais reçu mon message. | In fact, he had never received my message.
+      Je croyais qu'il plaisantait. | I thought he was joking.
+      Elle m'a regardé sans rien dire. | She looked at me without saying a word.
+      Il m'a répondu qu'il n'était pas au courant. | He told me he didn't know anything about it.
+      Elle m'a demandé si j'étais sûr de moi. | She asked me if I was sure.
+      Je lui ai dit de ne pas s'inquiéter. | I told her not to worry.
+      Il a éclaté de rire. | He burst out laughing.
+      Elle s'est mise à pleurer. | She started to cry.
+      Nous nous sommes regardés en silence. | We looked at each other in silence.
+      Personne n'osait parler. | No one dared to speak.
+      Le pire, c'est que j'avais oublié mon portefeuille. | The worst part was that I'd forgotten my wallet.
+      Le plus drôle, c'est qu'il ne s'est rendu compte de rien. | The funniest part is that he didn't notice a thing.
+      Heureusement, un passant m'a aidé. | Luckily, a passerby helped me.
+      Malheureusement, il était déjà trop tard. | Unfortunately, it was already too late.
+      Par chance, j'avais gardé son numéro. | As luck would have it, I'd kept his number.
+      À ma grande surprise, elle a dit oui. | To my great surprise, she said yes.
+      Contre toute attente, nous avons gagné. | Against all odds, we won.
+      J'ai failli rater mon avion. | I almost missed my flight.
+      J'étais sur le point de partir quand il est arrivé. | I was about to leave when he showed up.
+      Je venais de m'endormir quand le réveil a sonné. | I'd just fallen asleep when the alarm went off.
+      Je n'avais jamais rien vu de pareil. | I'd never seen anything like it.
+      C'était la première fois que je prenais l'avion. | It was the first time I'd ever flown.
+      Je m'en souviens comme si c'était hier. | I remember it as if it were yesterday.
+      Je ne l'oublierai jamais. | I'll never forget it.
+      Imagine la scène ! | Picture the scene!
+      Tu aurais dû voir sa tête ! | You should have seen his face!
+      Attends, tu ne connais pas la suite. | Wait, you haven't heard the rest.
+      Et ce n'est pas tout ! | And that's not all!
+      Tu sais ce qu'il m'a répondu ? | Do you know what he said to me?
+      Je te le donne en mille. | You'll never guess in a million years.
+      Bref, je te passe les détails. | Anyway, I'll spare you the details.
+      Pour faire court, nous avons raté le dernier train. | To cut a long story short, we missed the last train.
+      Où est-ce que j'en étais ? | Where was I?
+      Ah oui, je te parlais du voyage. | Oh yes, I was telling you about the trip.
+      Revenons au début de l'histoire. | Let's go back to the beginning of the story.
+      Avant ça, il faut que je t'explique quelque chose. | Before that, I need to explain something.
+      On m'a raconté que le château était hanté. | I was told the castle was haunted.
+      D'après la légende, un trésor est caché sous la colline. | According to legend, a treasure is hidden under the hill.
+      Il paraît qu'ils se sont rencontrés dans un train. | Apparently, they met on a train.
+      Le héros de l'histoire est un jeune boulanger. | The hero of the story is a young baker.
+      Un jour, il décide de quitter son village. | One day, he decides to leave his village.
+      En chemin, il rencontre une vieille dame. | Along the way, he meets an old lady.
+      Elle lui confie un secret. | She tells him a secret.
+      Il doit choisir entre l'amour et la fortune. | He has to choose between love and fortune.
+      L'histoire se déroule à Paris, dans les années vingt. | The story takes place in Paris in the twenties.
+      Le suspense dure jusqu'à la dernière page. | The suspense lasts until the very last page.
+      Je ne veux pas te raconter la fin. | I don't want to spoil the ending.
+      Finalement, tout s'est arrangé. | In the end, everything worked out.
+      En fin de compte, c'était une fausse alerte. | As it turned out, it was a false alarm.
+      Ils se sont réconciliés quelques mois plus tard. | They made up a few months later.
+      Depuis ce jour, nous sommes inséparables. | Ever since that day, we've been inseparable.
+      Ils se marièrent et eurent beaucoup d'enfants. | And they lived happily ever after.
+      Et c'est ainsi que j'ai rencontré ma femme. | And that's how I met my wife.
+      Voilà comment j'ai appris le français. | That's how I learned French.
+      Plus de peur que de mal ! | It was more of a scare than anything!
+      Tout est bien qui finit bien. | All's well that ends well.
+      La morale de l'histoire, c'est qu'il ne faut jamais abandonner. | The moral of the story is: never give up.
+      C'est une histoire vraie, je te le promets. | It's a true story, I promise.
+      Avec le recul, je trouve ça plutôt drôle. | Looking back, I find it rather funny.
+      Et toi, il t'est déjà arrivé quelque chose comme ça ? | What about you, has anything like that ever happened to you?
+    `) },
+  { id: 'xf', group: 'expression', name: 'Les expressions françaises', emoji: '🐓', color: '#C44569',
+    desc: 'Les expressions imagées que les Français utilisent tous les jours.',
+    phrases: lines(`
+      Il pleut des cordes ! | It's pouring!
+      J'ai un chat dans la gorge. | I have a frog in my throat.
+      Ça coûte les yeux de la tête. | It costs an arm and a leg.
+      Il m'a posé un lapin. | He stood me up.
+      Elle est tombée dans les pommes. | She fainted.
+      J'ai du pain sur la planche. | I've got a lot on my plate.
+      Ce n'est pas la mer à boire. | It's not that big a deal.
+      C'est simple comme bonjour. | It's as easy as pie.
+      Je l'ai fait les doigts dans le nez. | I did it with my eyes closed.
+      Revenons à nos moutons. | Let's get back to the subject at hand.
+      Il a un poil dans la main. | He's a real slacker.
+      Tu me casses les pieds ! | You're being a pain!
+      Arrête de raconter des salades. | Stop telling tall tales.
+      Je donne ma langue au chat. | I give up, tell me.
+      Il a la tête dans les nuages. | He has his head in the clouds.
+      Tu es dans la lune aujourd'hui ! | You're miles away today!
+      Elle a mis les pieds dans le plat. | She really put her foot in her mouth.
+      Il ne faut pas tourner autour du pot. | Don't beat around the bush.
+      Ne vends pas la mèche ! | Don't spill the beans!
+      Je ne suis pas dans mon assiette aujourd'hui. | I'm feeling a bit off today.
+      Il en fait tout un fromage. | He's making a mountain out of a molehill.
+      Occupe-toi de tes oignons ! | Mind your own business!
+      Il met toujours son grain de sel. | He always has to put in his two cents.
+      J'ai d'autres chats à fouetter. | I have bigger fish to fry.
+      Tu cherches midi à quatorze heures. | You're overcomplicating things.
+      On a fait d'une pierre deux coups. | We killed two birds with one stone.
+      Quand les poules auront des dents ! | When pigs fly!
+      C'est la goutte d'eau qui fait déborder le vase. | That's the last straw.
+      Il a pris ses jambes à son cou. | He ran for it.
+      J'ai eu un coup de foudre pour cette ville. | I fell in love with this city at first sight.
+      Ils s'entendent comme chien et chat. | They fight like cats and dogs.
+      Ils se ressemblent comme deux gouttes d'eau. | They're like two peas in a pod.
+      Elle a le cœur sur la main. | She'd give you the shirt off her back.
+      Il a un cœur d'or. | He has a heart of gold.
+      J'ai la pêche ce matin ! | I'm full of energy this morning!
+      Je me suis mis sur mon trente et un ce soir. | I'm dressed to the nines tonight.
+      Il s'est levé du pied gauche. | He got up on the wrong side of the bed.
+      J'ai passé une nuit blanche. | I was up all night.
+      Je dors comme un loir. | I sleep like a log.
+      J'ai un coup de barre après le déjeuner. | I always hit a slump after lunch.
+      Il faut se serrer la ceinture ce mois-ci. | We need to tighten our belts this month.
+      Il jette l'argent par les fenêtres. | He throws money down the drain.
+      Je suis fauché comme les blés. | I'm flat broke.
+      Ça ne court pas les rues. | You don't come across that every day.
+      Tu peux me donner un coup de pouce ? | Could you help me out?
+      Il faut mettre la main à la pâte. | Everyone needs to pitch in.
+      J'ai mis les bouchées doubles pour finir à temps. | I worked twice as hard to finish on time.
+      Il travaille d'arrache-pied. | He's working flat out.
+      On n'est pas sortis de l'auberge. | We're not out of the woods yet.
+      C'est la fin des haricots ! | We're done for!
+      Ça tombe à pic ! | Perfect timing!
+      Tu tombes bien, j'allais t'appeler. | Good timing, I was just about to call you.
+      Ça me fait une belle jambe. | A fat lot of good that does me.
+      Je m'en mords les doigts. | I'm kicking myself.
+      Il a retourné sa veste. | He switched sides.
+      Elle n'a pas la langue dans sa poche. | She's not afraid to speak her mind.
+      J'ai le mot sur le bout de la langue. | It's on the tip of my tongue.
+      Il a le bras long. | He has friends in high places.
+      C'est du gâteau ! | It's a piece of cake!
+      Ce n'est pas de la tarte. | It's no walk in the park.
+      Il a pris la grosse tête. | It's gone to his head.
+      Il se prend pour le nombril du monde. | He thinks the world revolves around him.
+      Elle le mène par le bout du nez. | She has him wrapped around her little finger.
+      Je l'ai payé une bouchée de pain. | I got it for next to nothing.
+      Ça ne mange pas de pain. | It can't hurt.
+      Il a mis de l'eau dans son vin. | He's toned it down.
+      On va arroser ça ! | Let's drink to that!
+      Il boit comme un trou. | He drinks like a fish.
+      Je suis tombé sur un vieil ami. | I ran into an old friend.
+      J'ai sauté du coq à l'âne. | I jumped from one topic to another.
+      Elle a une mémoire d'éléphant. | She has a memory like an elephant.
+      Il est têtu comme une mule. | He's as stubborn as a mule.
+      Elle est rusée comme un renard. | She's as sly as a fox.
+      Il est malin comme un singe. | He's as clever as they come.
+      J'ai une fièvre de cheval. | I have a raging fever.
+      Il fait un temps de chien. | The weather is awful.
+      J'ai la chair de poule. | I've got goosebumps.
+      Ne mets pas la charrue avant les bœufs. | Don't put the cart before the horse.
+      Il ne faut pas vendre la peau de l'ours avant de l'avoir tué. | Don't count your chickens before they hatch.
+      Il y a anguille sous roche. | Something fishy is going on.
+      Ça me met la puce à l'oreille. | That makes me suspicious.
+      Il a d'autres cordes à son arc. | He has more than one string to his bow.
+      Je vais le garder à l'œil. | I'll keep an eye on him.
+      Ça saute aux yeux. | It's glaringly obvious.
+      Je n'ai pas fermé l'œil de la nuit. | I didn't sleep a wink all night.
+      Il me tape sur les nerfs. | He gets on my nerves.
+      J'en ai par-dessus la tête. | I've had it up to here.
+      La moutarde me monte au nez. | I'm starting to lose my temper.
+      Elle a pris la mouche. | She got all huffy.
+      On s'est fendu la poire. | We laughed our heads off.
+      C'est une autre paire de manches. | That's a whole different ball game.
+      Je vais tirer ça au clair. | I'm going to get to the bottom of this.
+      Il faut battre le fer tant qu'il est chaud. | Strike while the iron is hot.
+      Mieux vaut tard que jamais. | Better late than never.
+      Qui ne tente rien n'a rien. | Nothing ventured, nothing gained.
+      L'habit ne fait pas le moine. | Don't judge a book by its cover.
+      Petit à petit, l'oiseau fait son nid. | Rome wasn't built in a day.
+      Après la pluie, le beau temps. | Every cloud has a silver lining.
+      On ne peut pas avoir le beurre et l'argent du beurre. | You can't have your cake and eat it too.
+      C'est en forgeant qu'on devient forgeron. | Practice makes perfect.
+    `) },
 ];
 CATS.forEach(c => {
   c.phrases = c.phrases.map((line, i) => {
@@ -1110,6 +1750,7 @@ CATS.forEach(c => {
     return { id: c.id + String(i + 1).padStart(2, '0'), text, en, cat: c.id };
   });
 });
+CATS.sort((a, b) => GROUPS.findIndex(g => g.id === a.group) - GROUPS.findIndex(g => g.id === b.group)); // ordre de l'accueil
 const ALL = CATS.flatMap(c => c.phrases);
 const byId = id => ALL.find(p => p.id === id);
 const catById = id => CATS.find(c => c.id === id);
@@ -1135,10 +1776,16 @@ const BADGES = [
   { id: 'cat-en', icon: '💼', name: 'Le poste est à vous', desc: 'Terminer « Entretien d\'embauche ».', test: s => s.catDone.en },
   { id: 'cat-em', icon: '😊', name: 'À cœur ouvert', desc: 'Terminer « Exprimer ses émotions au quotidien ».', test: s => s.catDone.em },
   { id: 'cat-cn', icon: '⚖️', name: 'Marché conclu', desc: 'Terminer « Convaincre & Négocier ».', test: s => s.catDone.cn },
+  { id: 'cat-su', icon: '🚀', name: 'Esprit start-up', desc: 'Terminer « Travailler en start-up ».', test: s => s.catDone.su },
+  { id: 'cat-fi', icon: '📊', name: 'Les bons comptes', desc: 'Terminer « Le secteur de la finance – contrôle de gestion ».', test: s => s.catDone.fi },
+  { id: 'cat-lx', icon: '💎', name: 'Service d\'exception', desc: 'Terminer « Le secteur du luxe – retail ».', test: s => s.catDone.lx },
+  { id: 'cat-cl', icon: '🔗', name: 'Le fil des idées', desc: 'Terminer « Les connecteurs logiques ».', test: s => s.catDone.cl },
+  { id: 'cat-hi', icon: '📖', name: 'Il était une fois', desc: 'Terminer « Raconter une histoire ».', test: s => s.catDone.hi },
+  { id: 'cat-xf', icon: '🐓', name: 'Haut en couleur', desc: 'Terminer « Les expressions françaises ».', test: s => s.catDone.xf },
   { id: 'first10', icon: '✨', name: 'Du premier coup', desc: 'Valider 10 phrases dès le premier essai.', test: s => s.firstTry >= 10 },
   { id: 'grit', icon: '💪', name: 'Persévérance', desc: 'Valider une phrase après trois essais ratés.', test: s => s.grit >= 1 },
   { id: 'star25', icon: '⭐', name: 'Diction parfaite', desc: 'Obtenir 3 étoiles sur 25 phrases.', auto: true, test: s => s.stars3 >= 25 },
-  { id: 'allcats', icon: '🧭', name: 'Touche-à-tout', desc: 'Pratiquer les ' + CATS.length + ' thèmes le même jour.', test: s => s.todayCats >= CATS.length },
+  { id: 'allcats', icon: '🧭', name: 'Touche-à-tout', desc: 'Pratiquer 6 thèmes différents le même jour.', test: s => s.todayCats >= 6 },
   { id: 'd40', icon: '🚀', name: 'Double dose', desc: 'Valider 40 phrases le même jour.', test: s => s.today >= 40 },
   { id: 'early', icon: '🌅', name: 'Lève-tôt', desc: 'Pratiquer avant 8 heures du matin.', test: s => s.early },
   { id: 'late', icon: '🌙', name: 'Oiseau de nuit', desc: 'Pratiquer après 22 heures.', test: s => s.late },
@@ -1154,7 +1801,7 @@ const MAX_TAKE_MS = 15000;   // durée maximale d'un enregistrement
 const freshState = () => ({
   v: 1, name: '', onboarded: false, lastCat: null,
   settings: { goal: 20, voice: '', autoCheck: true, sounds: true, reminder: false, reminderTime: '18:00' },
-  phrases: {}, days: {}, badges: {}, counters: {}, hints: {},
+  phrases: {}, days: {}, badges: {}, counters: {}, hints: {}, folded: {},
 });
 let storageOk = true;
 let state = loadState();
@@ -1729,14 +2376,24 @@ function homeHTML() {
     Object.entries(MIX).map(([id, m]) => '<a class="card mode" href="#/' + id + '"><span class="cat-emoji" aria-hidden="true">' + m.emoji + '</span><div><h3>' + m.name +
       '</h3><p>' + (m.size ? m.size + ' phrases tirées au hasard.' : 'Des phrases au hasard, sans fin.') + '</p></div></a>').join('') + '</div>' +
     '<div class="section-title"><h2>Les thèmes</h2><span class="muted">' + done + ' / ' + ALL.length + ' phrases</span></div>' +
-    '<div class="cats">' + CATS.map(c => {
-      const pr = catProgress(c);
-      return '<a class="card cat" href="#/theme/' + c.id + '" style="--c:' + c.color + '"><div class="cat-head"><span class="cat-emoji" aria-hidden="true">' + c.emoji +
-        '</span><h3>' + esc(c.name) + '</h3></div><p>' + esc(c.desc) + '</p><div class="bar"><i style="width:' + (100 * pr.done / pr.total) + '%"></i></div>' +
-        '<div class="cat-foot"><span><b>' + pr.done + '</b> / ' + pr.total + (pr.done === pr.total ? ' ✓' : '') + '</span><span>★ ' + pr.stars + '</span></div></a>';
-    }).join('') + '</div>' +
+    GROUPS.map(groupHTML).join('') +
     '<div class="card overall"><div class="overall-row"><span>Progression générale</span><span>' + Math.round(100 * done / ALL.length) + ' %</span></div>' +
     '<div class="bar"><i style="width:' + (100 * done / ALL.length) + '%"></i></div></div>';
+}
+
+/** Une famille de thèmes sur l'accueil : un titre qui se replie, puis une carte par thème. */
+function groupHTML(g) {
+  const cats = CATS.filter(c => c.group === g.id), prog = cats.map(catProgress);
+  const done = prog.reduce((n, pr) => n + pr.done, 0), total = prog.reduce((n, pr) => n + pr.total, 0);
+  const chevron = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  return '<details class="group" data-group="' + g.id + '"' + (state.folded[g.id] ? '' : ' open') + '><summary><span class="g-name">' + g.emoji + ' ' + esc(g.name) +
+    '</span><span class="g-count">' + cats.length + ' thèmes · <b>' + done + '</b> / ' + total + '</span>' + chevron + '</summary><div class="cats">' +
+    cats.map((c, i) => {
+      const pr = prog[i];
+      return '<a class="card cat" href="#/theme/' + c.id + '" style="--c:' + c.color + '"><span class="cat-emoji" aria-hidden="true">' + c.emoji + '</span><div class="cat-body"><h3>' + esc(c.name) +
+        '</h3><p>' + esc(c.desc) + '</p><div class="cat-prog"><div class="bar"><i style="width:' + (100 * pr.done / pr.total) + '%"></i></div><span><b>' + pr.done + '</b> / ' + pr.total +
+        (pr.done === pr.total ? ' ✓' : '') + '</span><span>★ ' + pr.stars + '</span></div></div></a>';
+    }).join('') + '</div></details>';
 }
 
 /* Présentation : affichée au premier lancement, et à la demande depuis Réglages. */
@@ -2060,6 +2717,11 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'e' || e.key === 'E') { const p = currentPhrase(); if (p) TTS.speak(p.text, 0.95); }
   else if (e.key === 'Enter' || e.key === 'ArrowRight') { if (!take) location.hash = nextHref(); }
 });
+document.addEventListener('toggle', e => { // une famille repliée le reste aux prochaines visites
+  const id = e.target.dataset?.group;
+  if (!id || !!state.folded[id] === !e.target.open) return;
+  state.folded[id] = !e.target.open; save();
+}, true);
 window.addEventListener('hashchange', () => { sheet = null; render(); applyUpdate(); });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { if (take?.phase === 'recording') stopTake(); return; }
