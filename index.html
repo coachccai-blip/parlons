@@ -1146,7 +1146,10 @@ const BADGES = [
 
 /* ───────────────────────── État et sauvegarde ───────────────────────── */
 const STORE_KEY = 'parlons.v1';
-const PASS = 0.8;            // score minimal pour valider automatiquement
+const PASS = 0.5;            // score minimal pour valider automatiquement : une étoile
+const STAR2 = 0.66;          // deux étoiles
+const STAR3 = 0.85;          // trois étoiles
+const starsFor = score => (score >= STAR3 ? 3 : score >= STAR2 ? 2 : 1);
 const MAX_TAKE_MS = 15000;   // durée maximale d'un enregistrement
 const freshState = () => ({
   v: 1, name: '', onboarded: false, lastCat: null,
@@ -1214,7 +1217,7 @@ function validate(p, mode, score) {
   const now = new Date(), cat = catById(p.cat);
   const ph = state.phrases[p.id] || (state.phrases[p.id] = { tries: 0 });
   const first = !ph.ok;
-  const stars = mode === 'auto' ? (score >= 0.95 ? 3 : score >= 0.88 ? 2 : 1) : mode === 'self' ? 2 : 1;
+  const stars = mode === 'auto' ? starsFor(score) : mode === 'self' ? 2 : 1;
   if (first) {
     ph.ok = true; ph.okFirst = ph.tries <= 1;
     if (ph.tries >= 4) state.counters.grit = (state.counters.grit || 0) + 1;
@@ -1254,6 +1257,9 @@ function norm(text) {
   let s = String(text).toLowerCase().replace(/[’`´]/g, '\'').replace(/œ/g, 'oe').replace(/æ/g, 'ae');
   s = s.replace(/(\d+)\s*h\s*(\d{1,2})?(?![a-zà-ÿ])/g, (m, h, min) => ' ' + h + ' heures ' + (min && +min ? min : '') + ' ');
   s = s.replace(/%/g, ' pour cent ').replace(/€/g, ' euros ').replace(/°/g, ' degres ');
+  s = s.replace(/(\d)[\s.](?=\d{3}(?!\d))/g, '$1');                                   // « 3 000 » → « 3000 »
+  s = s.replace(/\bmme\b\.?/g, 'madame').replace(/\bmlle\b\.?/g, 'mademoiselle').replace(/\bm\.(?=\s)/g, 'monsieur');
+  s = s.replace(/(\d)\s*kg\b/g, '$1 kilo').replace(/(\d)\s*km\b/g, '$1 kilometres').replace(/(\d)\s*(?:min|mn)\b/g, '$1 minutes');
   s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
   s = s.replace(/\b1er\b/g, 'premier').replace(/\b1(?:ere|re)\b/g, 'premiere').replace(/\b2(?:e|eme|nd|nde)\b/g, 'deuxieme');
   s = s.replace(/\d+/g, m => ' ' + (m.length <= 6 ? numFr(+m) : m) + ' ');
@@ -1274,7 +1280,13 @@ function charSim(a, b) {
   if (!a.length && !b.length) return 1;
   return 1 - lev(a, b, eq)[a.length][b.length] / Math.max(a.length, b.length);
 }
-const closeWord = (a, b) => a === b || (Math.min(a.length, b.length) >= 4 && charSim(a, b) >= 0.75);
+/** Clé sonore approximative d'un mot. La reconnaissance choisit souvent un homophone (et / est, ces / ses,
+    on / ont, peux / peut, un / une…) : ce n'est pas une faute de prononciation, les deux mots ont la même clé. */
+function soundKey(w) {
+  const base = (w === 'une' ? 'un' : w).replace(/ai/g, 'e').replace(/^c(?=[ea]|$)/, 's');
+  return base.replace(/[stxdz]+$/, '').replace(/([aeiouy])e$/, '$1') || base;
+}
+const closeWord = (a, b) => a === b || soundKey(a) === soundKey(b) || (Math.min(a.length, b.length) >= 4 && charSim(a, b) >= 0.75);
 /** Compare la phrase attendue et ce qui a été entendu. Renvoie le score et, mot par mot, ce qui a été reconnu. */
 function compare(target, heard) {
   const tw = norm(target).split(' ').filter(Boolean), hw = norm(heard).split(' ').filter(Boolean);
@@ -1440,7 +1452,7 @@ async function startTake() {
   const useRec = canRecord && !(useSR && isMobile); // sur téléphone, micro et reconnaissance ne cohabitent pas
   if (!useSR && !useRec) { recError('Ce navigateur ne permet pas d\'utiliser le micro. Essayez avec Chrome, Edge ou Safari.'); return; }
   dropResult();
-  const t = take = { phase: 'starting', id: p.id, useSR, useRec, interim: '', alts: [], blob: null, srError: null, spoke: false, quiet: 0, loud: 0 };
+  const t = take = { phase: 'starting', id: p.id, useSR, useRec, interim: '', alts: [], segs: [], blob: null, srError: null, spoke: false, quiet: 0, loud: 0 };
   renderRecorder();
   if (useRec) {
     try {
@@ -1466,7 +1478,7 @@ async function startTake() {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const res = e.results[i];
-        if (res.isFinal) { for (let k = 0; k < res.length; k++) t.alts.push(res[k].transcript); }
+        if (res.isFinal) { t.segs[i] = res[0].transcript; for (let k = 0; k < res.length; k++) t.alts.push(res[k].transcript); }
         else interim += res[0].transcript;
       }
       t.interim = interim || t.alts[0] || t.interim;
@@ -1523,6 +1535,7 @@ function finishTake(t) {
   const url = t.blob && t.blob.size > 800 ? URL.createObjectURL(t.blob) : null;
   const ph = state.phrases[p.id] || (state.phrases[p.id] = { tries: 0 });
   let r;
+  if (t.useSR && !t.alts.length && t.interim.trim()) t.alts.push(t.interim); // pas de résultat définitif : on garde ce qui a été compris en cours de route
   const srBroken = t.useSR && (['network', 'service-not-allowed', 'not-allowed', 'audio-capture', 'language-not-supported', 'start'].includes(t.srError)
     || (!t.alts.length && t.spoke && !!url)); // rien compris alors que le micro a capté de la voix : le service ne répond pas
   if (srBroken) {
@@ -1539,7 +1552,8 @@ function finishTake(t) {
     if (!t.alts.length) r = { mode: 'auto', nothing: true, score: 0, url, blob: t.blob };
     else {
       let best = null;
-      for (const heard of t.alts) { const c = compare(p.text, heard); if (!best || c.score > best.score) best = { ...c, heard: heard.trim() }; }
+      const whole = t.segs.filter(Boolean).join(' '); // phrase rendue en plusieurs morceaux : on juge aussi l'ensemble
+      for (const heard of [...t.alts, whole]) { const c = compare(p.text, heard); if (!best || c.score > best.score) best = { ...c, heard: heard.trim() }; }
       r = { mode: 'auto', ...best, url, blob: t.blob };
     }
   } else if (t.seen && !t.spoke) {
@@ -1950,11 +1964,12 @@ function resultHTML() {
       '<div class="actions">' + retry + '<button class="btn ok" data-act="self-ok">✓ C\'est bon</button></div>';
   }
   if (r.validated) {
-    const title = r.mode !== 'auto' ? 'Validé !' : r.score >= 0.95 ? 'Excellent !' : r.score >= 0.88 ? 'Très bien !' : 'Bien !';
+    const title = r.mode !== 'auto' ? 'Validé !' : r.stars === 3 ? 'Excellent !' : r.stars === 2 ? 'Bien !' : 'Pas mal !';
     return '<div class="verdict"><span class="dot">✓</span>' + title + '</div><div class="stars">' + starsHTML(r.stars || 1) + '</div>' +
-      (r.heard && r.score < 0.95 ? '<p class="heard">Le navigateur a compris : <q>« ' + esc(r.heard) + ' »</q></p>' : '') + compareBtns + '<div class="actions">' + retry + next + '</div>';
+      (r.heard && r.score < 0.999 ? '<p class="heard">Le navigateur a compris : <q>« ' + esc(r.heard) + ' »</q>' +
+        (r.stars < 3 ? '<br>Retravaillez les mots soulignés, puis refaites la phrase pour gagner des étoiles.' : '') + '</p>' : '') + compareBtns + '<div class="actions">' + retry + next + '</div>';
   }
-  const near = r.score >= 0.55;
+  const near = r.score >= 0.3;
   return '<div class="verdict ' + (near ? 'mid' : 'low') + '"><span class="dot">' + (near ? '≈' : '↻') + '</span>' + (near ? 'Presque !' : 'Essayez encore') + '</div>' +
     '<p class="heard">Le navigateur a compris : <q>« ' + esc(r.heard) + ' »</q><br>Les mots soulignés sont à retravailler.</p>' + compareBtns +
     '<div class="actions"><button class="btn primary" data-act="record">↻ Réessayer</button></div>' +

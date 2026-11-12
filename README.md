@@ -130,7 +130,7 @@ utilise celles de l'appareil. La voix se change ensuite dans *Réglages*.
 | | Vérification automatique | Auto-évaluation |
 |---|---|---|
 | Navigateurs | Chrome, Edge, Safari | Firefox, ou si l'étudiant la préfère |
-| Principe | Le navigateur transcrit ce qu'il a compris ; l'application compare avec la phrase et souligne les mots à retravailler. Validé à partir de 80 % de ressemblance, 1 à 3 étoiles. | L'étudiant réécoute sa voix, la compare au modèle, et décide : « C'est bon » ou « Réessayer ». |
+| Principe | Le navigateur transcrit ce qu'il a compris ; l'application compare avec la phrase et souligne les mots à retravailler. Validé à partir de 50 % de ressemblance : 1 étoile dès 50 %, 2 étoiles dès 66 %, 3 étoiles dès 85 %. La ponctuation, les majuscules, les accents, les homophones (et / est, ces / ses…) et les nombres écrits en chiffres ne comptent pas comme des erreurs. | L'étudiant réécoute sa voix, la compare au modèle, et décide : « C'est bon » ou « Réessayer ». |
 | Données | La voix est envoyée au service de reconnaissance du navigateur (Google, Apple ou Microsoft). | Rien ne quitte l'appareil. |
 
 La vérification automatique mesure si la phrase est **comprise**, pas la finesse de l'accent :
